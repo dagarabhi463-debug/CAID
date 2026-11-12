@@ -552,25 +552,22 @@ recoverable via `git show bfdca25:docs/`).
 - Local-only AI analyst with prompt-injection sanitization and safe
   threat-hunting queries.
 
-### Known issues (latest test run)
+### Test status (v1.0, 2026-11-12)
 
-`pytest tests -q` → **436 passed, 3 failed**:
-
-- `tests/test_milestone_2_2_incidents.py::TestReports::test_pdf_is_valid`
-- `tests/test_milestone_2_2_incidents.py::TestReports::test_pdf_shared_ip_caveat`
-- `tests/test_milestone_2_3_scenarios.py::TestScenarioCorrelations::test_scenarios_produce_multiple_incidents`
-
-The two PDF failures look environment/reportlab-related; the scenario test
-suggests a correlation-threshold edge case in one generated scenario.
-Worth investigating before relying on those paths.
+`pytest tests -q` → **544 passed, 0 skipped, 4 warnings**. The earlier
+"436 passed / 3 failed" note is obsolete (pre-release baseline).
 
 ### Documented limitations (by design)
 
+> **v1.0 note:** this section predates the v2_0 stack and streaming
+> pipeline. Authoritative limitation list: `docs/release/CAID_KNOWN_LIMITATIONS.md`.
+
 - **Synthetic data only** — no real Canvas connectivity; metrics are not
-  real-world accuracy figures.
-- **Retrospective, batch-oriented** — correlation/incidents describe the
-  analyzed window; no streaming/real-time alerting (incremental session
-  store deferred).
+  real-world accuracy figures. Independent synthetic holdout: recall 0.94,
+  precision 0.50 (`docs/research/phase_4_3_independent_validation.md`).
+- **Retrospective, batch-oriented dashboard** — streaming detection
+  exists (`core/streaming/`) but correlation/incidents remain
+  window-scoped.
 - **Heuristic, uncalibrated correlation thresholds** — `CorrelationConfig`
   cutoffs are documented defaults; correlation precision/recall can't be
   measured (datasets label events, not relationships).
