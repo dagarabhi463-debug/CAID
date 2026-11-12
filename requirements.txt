@@ -1,0 +1,24 @@
+# Web Framework
+streamlit
+
+# Data Processing
+pandas
+numpy
+
+# Machine Learning
+scikit-learn
+
+# Visualization
+plotly
+matplotlib
+
+# Testing
+pytest
+
+# PDF Reports
+reportlab
+
+# AI/LLM Integration (Optional)
+# Ollama is used via its local HTTP API (stdlib urllib) — install the
+# Ollama app separately and pull a model, e.g. `ollama pull llama3.1:8b`.
+# No Python package or API key is required.

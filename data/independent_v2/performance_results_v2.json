@@ -1,0 +1,45 @@
+{
+  "timings": {
+    "v1_9_baseline": {
+      "seconds": 4.2232,
+      "rows_per_sec": 355.2
+    },
+    "v2_ml_rules_behavioral": {
+      "seconds": 3.0191,
+      "rows_per_sec": 496.8
+    },
+    "v2_session": {
+      "seconds": 9.9284,
+      "rows_per_sec": 151.1
+    },
+    "v2_sequence": {
+      "seconds": 15.7612,
+      "rows_per_sec": 95.2
+    },
+    "v2_complete": {
+      "seconds": 12.8882,
+      "rows_per_sec": 116.4
+    }
+  },
+  "memory": {
+    "v1_9_baseline": {
+      "peak_mb": 8.51
+    },
+    "v2_ml_rules_behavioral": {
+      "peak_mb": 7.45
+    },
+    "v2_session": {
+      "peak_mb": 13.0
+    },
+    "v2_sequence": {
+      "peak_mb": 12.37
+    },
+    "v2_complete": {
+      "peak_mb": 16.53
+    }
+  },
+  "platform": {
+    "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "pandas": "3.1.1"
+  }
+}

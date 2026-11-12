@@ -1,0 +1,21 @@
+======================================================================
+CAID Milestone 1.6 Pipeline Benchmark
+======================================================================
+Python: 3.14.6
+Platform: Windows-11-10.0.26300-SP0
+CPU: Intel64 Family 6 Model 186 Stepping 2, GenuineIntel
+RAM: 16.9 GB
+pandas: 2.3.3
+
+Full synthetic dataset: 650 events
+
+Model load time: 28.7 ms
+
+Behavioral baselines loaded (persisted artifact).
+
+  rows |  feat_eng |   ml_pred |     risk |    rules |    behav |   detect |     TOTAL |  peakMB
+-----------------------------------------------------------------------------------------------
+   100 |    357.9m |    621.1m |     7.7m |     8.4m |    10.7m |    17.0m |   1022.9m |    1.2
+   500 |   2452.2m |   2517.6m |    18.6m |    43.2m |    37.1m |   115.4m |   5184.2m |    1.2
+  1000 |   3681.7m |   3453.7m |    25.2m |    74.4m |    98.5m |    98.6m |   7432.2m |    1.9
+   650 |   3103.8m |   2574.5m |    23.7m |    47.7m |    79.1m |    88.5m |   5917.2m |    0.6

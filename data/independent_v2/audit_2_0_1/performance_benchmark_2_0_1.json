@@ -1,0 +1,208 @@
+{
+  "milestone": "2.0.1",
+  "machine": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "cpu_count": 12
+  },
+  "dataset": "data/independent_v2 train+calibration+validation tiled to size; holdout excluded",
+  "warmup_runs": 1,
+  "sizes": {
+    "1000": {
+      "rows": 1000,
+      "users": 48,
+      "sessions_explicit": 671,
+      "components": {
+        "session_reconstruction": {
+          "median_s": 4.0587,
+          "p95_s": 4.0946,
+          "mean_s": 4.0179,
+          "peak_mb": 2.52,
+          "reps": 3
+        },
+        "session_baseline_transform": {
+          "median_s": 0.5609,
+          "p95_s": 0.5633,
+          "mean_s": 0.5154,
+          "peak_mb": 2.12,
+          "reps": 3
+        },
+        "sequence_detection": {
+          "median_s": 4.3346,
+          "p95_s": 4.3493,
+          "mean_s": 3.9317,
+          "peak_mb": 2.36,
+          "reps": 3
+        },
+        "ml_inference": {
+          "median_s": 0.3468,
+          "p95_s": 0.3639,
+          "mean_s": 0.3366,
+          "peak_mb": 1.06,
+          "reps": 3
+        },
+        "detection_fusion": {
+          "median_s": 2.1224,
+          "p95_s": 2.1538,
+          "mean_s": 1.9109,
+          "peak_mb": 6.58,
+          "reps": 3
+        },
+        "total_pipeline": {
+          "median_s": 13.8901,
+          "p95_s": 14.2945,
+          "mean_s": 12.9967,
+          "peak_mb": 8.98,
+          "reps": 3
+        }
+      }
+    },
+    "5000": {
+      "rows": 5000,
+      "users": 48,
+      "sessions_explicit": 3510,
+      "components": {
+        "session_reconstruction": {
+          "median_s": 19.6106,
+          "p95_s": 22.2125,
+          "mean_s": 20.3435,
+          "peak_mb": 9.62,
+          "reps": 3
+        },
+        "session_baseline_transform": {
+          "median_s": 5.1812,
+          "p95_s": 5.2075,
+          "mean_s": 4.3344,
+          "peak_mb": 11.95,
+          "reps": 3
+        },
+        "sequence_detection": {
+          "median_s": 24.7188,
+          "p95_s": 27.2251,
+          "mean_s": 24.6865,
+          "peak_mb": 10.36,
+          "reps": 3
+        },
+        "ml_inference": {
+          "median_s": 0.8779,
+          "p95_s": 0.9094,
+          "mean_s": 0.849,
+          "peak_mb": 4.87,
+          "reps": 3
+        },
+        "detection_fusion": {
+          "median_s": 9.6047,
+          "p95_s": 10.4049,
+          "mean_s": 9.0738,
+          "peak_mb": 33.51,
+          "reps": 3
+        },
+        "total_pipeline": {
+          "median_s": 58.4164,
+          "p95_s": 60.6667,
+          "mean_s": 58.377,
+          "peak_mb": 46.56,
+          "reps": 3
+        }
+      }
+    },
+    "10000": {
+      "rows": 10000,
+      "users": 48,
+      "sessions_explicit": 6993,
+      "components": {
+        "session_reconstruction": {
+          "median_s": 14.2719,
+          "p95_s": 14.92,
+          "mean_s": 14.2719,
+          "peak_mb": 19.12,
+          "reps": 2
+        },
+        "session_baseline_transform": {
+          "median_s": 3.52,
+          "p95_s": 3.5212,
+          "mean_s": 3.52,
+          "peak_mb": 26.42,
+          "reps": 2
+        },
+        "sequence_detection": {
+          "median_s": 29.7584,
+          "p95_s": 32.9381,
+          "mean_s": 29.7584,
+          "peak_mb": 19.38,
+          "reps": 2
+        },
+        "ml_inference": {
+          "median_s": 1.2024,
+          "p95_s": 1.2357,
+          "mean_s": 1.2024,
+          "peak_mb": 9.61,
+          "reps": 2
+        },
+        "detection_fusion": {
+          "median_s": 14.0428,
+          "p95_s": 14.205,
+          "mean_s": 14.0428,
+          "peak_mb": 68.07,
+          "reps": 2
+        },
+        "total_pipeline": {
+          "median_s": 105.7482,
+          "p95_s": 107.3833,
+          "mean_s": 105.7482,
+          "peak_mb": 95.56,
+          "reps": 2
+        }
+      }
+    },
+    "50000": {
+      "rows": 50000,
+      "users": 48,
+      "sessions_explicit": 35261,
+      "components": {
+        "session_reconstruction": {
+          "median_s": 51.3572,
+          "p95_s": 51.3572,
+          "mean_s": 51.3572,
+          "peak_mb": 95.1,
+          "reps": 1
+        },
+        "session_baseline_transform": {
+          "median_s": 19.3192,
+          "p95_s": 19.3192,
+          "mean_s": 19.3192,
+          "peak_mb": 154.8,
+          "reps": 1
+        },
+        "sequence_detection": {
+          "median_s": 148.6613,
+          "p95_s": 148.6613,
+          "mean_s": 148.6613,
+          "peak_mb": 95.44,
+          "reps": 1
+        },
+        "ml_inference": {
+          "median_s": 3.2632,
+          "p95_s": 3.2632,
+          "mean_s": 3.2632,
+          "peak_mb": 47.36,
+          "reps": 1
+        },
+        "detection_fusion": {
+          "median_s": 45.0124,
+          "p95_s": 45.0124,
+          "mean_s": 45.0124,
+          "peak_mb": 356.67,
+          "reps": 1
+        },
+        "total_pipeline": {
+          "median_s": 334.3824,
+          "p95_s": 334.3824,
+          "mean_s": 334.3824,
+          "peak_mb": 518.44,
+          "reps": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "generator": "data/generate_independent_datasets.py",
+  "seed": 1900,
+  "splits": {
+    "train": {
+      "file": "train.csv",
+      "role": "train",
+      "rows": 3000,
+      "label_counts": {
+        "normal": 2413,
+        "suspicious": 389,
+        "high_risk": 198
+      },
+      "unique_users": 140,
+      "unique_ips": 120
+    },
+    "calibration": {
+      "file": "calibration.csv",
+      "role": "calibration",
+      "rows": 800,
+      "label_counts": {
+        "normal": 725,
+        "suspicious": 48,
+        "high_risk": 27
+      },
+      "unique_users": 140,
+      "unique_ips": 120
+    },
+    "validation": {
+      "file": "validation.csv",
+      "role": "validation",
+      "rows": 800,
+      "label_counts": {
+        "normal": 599,
+        "suspicious": 132,
+        "high_risk": 69
+      },
+      "unique_users": 140,
+      "unique_ips": 120
+    },
+    "holdout": {
+      "file": "holdout.csv",
+      "role": "holdout",
+      "rows": 1500,
+      "label_counts": {
+        "normal": 1073,
+        "suspicious": 293,
+        "high_risk": 134
+      },
+      "unique_users": 200,
+      "unique_ips": 160
+    }
+  },
+  "entity_pools": {
+    "shared_users": 140,
+    "holdout_only_users": 60,
+    "shared_ips": 120,
+    "holdout_only_ips": 40
+  },
+  "overlap": {
+    "train_vs_calibration": {
+      "shared_users": 140,
+      "shared_ips": 120,
+      "holdout_only_users_present": 0,
+      "holdout_only_ips_present": 0
+    },
+    "train_vs_validation": {
+      "shared_users": 140,
+      "shared_ips": 120,
+      "holdout_only_users_present": 0,
+      "holdout_only_ips_present": 0
+    },
+    "train_vs_holdout": {
+      "shared_users": 140,
+      "shared_ips": 120,
+      "holdout_only_users_present": 60,
+      "holdout_only_ips_present": 40
+    },
+    "holdout_unseen_users": 60,
+    "holdout_unseen_ips": 40,
+    "train_holdout_shared_users": 140,
+    "train_holdout_shared_ips": 120
+  },
+  "label_crosstabs": {
+    "label_x_ip_prefix": {
+      "high_risk": {
+        "192.0.2.": 51,
+        "198.51.100.": 42,
+        "203.0.113.": 41
+      },
+      "normal": {
+        "192.0.2.": 404,
+        "198.51.100.": 321,
+        "203.0.113.": 348
+      },
+      "suspicious": {
+        "192.0.2.": 99,
+        "198.51.100.": 99,
+        "203.0.113.": 95
+      }
+    },
+    "label_x_hour_band": {
+      "high_risk": {
+        "night_0-5": 74,
+        "morning_6-11": 18,
+        "afternoon_12-17": 21,
+        "evening_18-23": 21
+      },
+      "normal": {
+        "night_0-5": 42,
+        "morning_6-11": 352,
+        "afternoon_12-17": 385,
+        "evening_18-23": 294
+      },
+      "suspicious": {
+        "night_0-5": 24,
+        "morning_6-11": 91,
+        "afternoon_12-17": 97,
+        "evening_18-23": 81
+      }
+    },
+    "label_x_event_type": {
+      "high_risk": {
+        "assignment_submit": 10,
+        "bulk_download": 21,
+        "bulk_export": 7,
+        "course_export": 14,
+        "course_view": 10,
+        "discussion_post": 4,
+        "enrollment_view": 6,
+        "grade_download": 15,
+        "grade_view": 7,
+        "login": 2,
+        "lti_launch": 3,
+        "mastery_check": 3,
+        "resource_view": 8,
+        "student_export": 22,
+        "wiki_review": 2
+      },
+      "normal": {
+        "assignment_submit": 132,
+        "bulk_download": 2,
+        "bulk_export": 18,
+        "course_export": 6,
+        "course_view": 139,
+        "discussion_post": 172,
+        "enrollment_view": 15,
+        "grade_download": 6,
+        "grade_view": 172,
+        "login": 186,
+        "lti_launch": 26,
+        "mastery_check": 9,
+        "resource_view": 173,
+        "student_export": 1,
+        "wiki_review": 16
+      },
+      "suspicious": {
+        "assignment_submit": 33,
+        "bulk_download": 8,
+        "bulk_export": 22,
+        "course_export": 8,
+        "course_view": 34,
+        "discussion_post": 35,
+        "enrollment_view": 20,
+        "grade_download": 11,
+        "grade_view": 41,
+        "login": 32,
+        "lti_launch": 3,
+        "mastery_check": 6,
+        "resource_view": 29,
+        "student_export": 8,
+        "wiki_review": 3
+      }
+    }
+  },
+  "quality": {
+    "total_rows": 6100,
+    "exact_duplicate_rows": 0,
+    "missing_required": 0,
+    "labels": [
+      "high_risk",
+      "normal",
+      "suspicious"
+    ]
+  }
+}
