@@ -1,0 +1,297 @@
+{
+  "dataset": "data/independent_v2 (recovered from git bfdca25)",
+  "split": "holdout",
+  "rows": 1500,
+  "user_overlap_with_train_validation": [
+    "user_000",
+    "user_001",
+    "user_002",
+    "user_003",
+    "user_004",
+    "user_005",
+    "user_006",
+    "user_007",
+    "user_008",
+    "user_009",
+    "user_010",
+    "user_011",
+    "user_012",
+    "user_013",
+    "user_014",
+    "user_015",
+    "user_016",
+    "user_017",
+    "user_018",
+    "user_019",
+    "user_020",
+    "user_021",
+    "user_022",
+    "user_023",
+    "user_024",
+    "user_025",
+    "user_026",
+    "user_027",
+    "user_028",
+    "user_029",
+    "user_030",
+    "user_031",
+    "user_032",
+    "user_033",
+    "user_034",
+    "user_035",
+    "user_036",
+    "user_037",
+    "user_038",
+    "user_039",
+    "user_040",
+    "user_041",
+    "user_042",
+    "user_043",
+    "user_044",
+    "user_045",
+    "user_046",
+    "user_047"
+  ],
+  "label_counts": {
+    "normal": 1065,
+    "suspicious": 274,
+    "high_risk": 161
+  },
+  "entity_disjoint_users": false,
+  "calibration_statuses": {
+    "risk": "calibrated",
+    "detection": "calibrated",
+    "threshold_version": "cal-20261112T035409Z-2962264f"
+  },
+  "operating_modes": {
+    "full_v2_0": 1500
+  },
+  "channels": {
+    "ml": {
+      "tp": 366,
+      "fp": 290,
+      "tn": 775,
+      "fn": 69,
+      "precision": 0.5579,
+      "recall": 0.8414,
+      "f1": 0.6709,
+      "fpr": 0.2723,
+      "roc_auc": 0.8756,
+      "pr_auc": 0.7937
+    },
+    "rules": {
+      "tp": 8,
+      "fp": 1,
+      "tn": 1064,
+      "fn": 427,
+      "precision": 0.8889,
+      "recall": 0.0184,
+      "f1": 0.036,
+      "fpr": 0.0009,
+      "roc_auc": 0.834,
+      "pr_auc": 0.7204
+    },
+    "behavioral": {
+      "tp": 307,
+      "fp": 40,
+      "tn": 1025,
+      "fn": 128,
+      "precision": 0.8847,
+      "recall": 0.7057,
+      "f1": 0.7852,
+      "fpr": 0.0376,
+      "roc_auc": 0.9089,
+      "pr_auc": 0.8416
+    },
+    "session": {
+      "tp": 93,
+      "fp": 18,
+      "tn": 1047,
+      "fn": 342,
+      "precision": 0.8378,
+      "recall": 0.2138,
+      "f1": 0.3407,
+      "fpr": 0.0169,
+      "roc_auc": 0.8752,
+      "pr_auc": 0.7201
+    },
+    "sequence": {
+      "tp": 323,
+      "fp": 132,
+      "tn": 933,
+      "fn": 112,
+      "precision": 0.7099,
+      "recall": 0.7425,
+      "f1": 0.7258,
+      "fpr": 0.1239,
+      "roc_auc": 0.8321,
+      "pr_auc": 0.7611
+    },
+    "combined_v2_0": {
+      "tp": 409,
+      "fp": 414,
+      "tn": 651,
+      "fn": 26,
+      "precision": 0.497,
+      "recall": 0.9402,
+      "f1": 0.6502,
+      "fpr": 0.3887,
+      "score_auc": {
+        "roc_auc": 0.9216,
+        "pr_auc": 0.8333
+      }
+    },
+    "slice_holdout_only_users": {
+      "ml": {
+        "tp": 102,
+        "fp": 66,
+        "tn": 166,
+        "fn": 16,
+        "precision": 0.6071,
+        "recall": 0.8644,
+        "f1": 0.7133,
+        "fpr": 0.2845,
+        "roc_auc": 0.8856,
+        "pr_auc": 0.8312
+      },
+      "rules": {
+        "tp": 2,
+        "fp": 0,
+        "tn": 232,
+        "fn": 116,
+        "precision": 1.0,
+        "recall": 0.0169,
+        "f1": 0.0333,
+        "fpr": 0.0,
+        "roc_auc": 0.862,
+        "pr_auc": 0.7793
+      },
+      "behavioral": {
+        "tp": 90,
+        "fp": 7,
+        "tn": 225,
+        "fn": 28,
+        "precision": 0.9278,
+        "recall": 0.7627,
+        "f1": 0.8372,
+        "fpr": 0.0302,
+        "roc_auc": 0.9319,
+        "pr_auc": 0.8969
+      },
+      "session": {
+        "tp": 26,
+        "fp": 2,
+        "tn": 230,
+        "fn": 92,
+        "precision": 0.9286,
+        "recall": 0.2203,
+        "f1": 0.3562,
+        "fpr": 0.0086,
+        "roc_auc": 0.9033,
+        "pr_auc": 0.8023
+      },
+      "sequence": {
+        "tp": 96,
+        "fp": 23,
+        "tn": 209,
+        "fn": 22,
+        "precision": 0.8067,
+        "recall": 0.8136,
+        "f1": 0.8101,
+        "fpr": 0.0991,
+        "roc_auc": 0.8693,
+        "pr_auc": 0.8372
+      },
+      "combined_v2_0": {
+        "tp": 112,
+        "fp": 93,
+        "tn": 139,
+        "fn": 6,
+        "precision": 0.5463,
+        "recall": 0.9492,
+        "f1": 0.6935,
+        "fpr": 0.4009,
+        "score_auc": {
+          "roc_auc": 0.9326,
+          "pr_auc": 0.8708
+        }
+      }
+    },
+    "slice_shared_users": {
+      "ml": {
+        "tp": 264,
+        "fp": 224,
+        "tn": 609,
+        "fn": 53,
+        "precision": 0.541,
+        "recall": 0.8328,
+        "f1": 0.6559,
+        "fpr": 0.2689,
+        "roc_auc": 0.8716,
+        "pr_auc": 0.7801
+      },
+      "rules": {
+        "tp": 6,
+        "fp": 1,
+        "tn": 832,
+        "fn": 311,
+        "precision": 0.8571,
+        "recall": 0.0189,
+        "f1": 0.037,
+        "fpr": 0.0012,
+        "roc_auc": 0.8244,
+        "pr_auc": 0.699
+      },
+      "behavioral": {
+        "tp": 217,
+        "fp": 33,
+        "tn": 800,
+        "fn": 100,
+        "precision": 0.868,
+        "recall": 0.6845,
+        "f1": 0.7654,
+        "fpr": 0.0396,
+        "roc_auc": 0.9017,
+        "pr_auc": 0.8232
+      },
+      "session": {
+        "tp": 67,
+        "fp": 16,
+        "tn": 817,
+        "fn": 250,
+        "precision": 0.8072,
+        "recall": 0.2114,
+        "f1": 0.335,
+        "fpr": 0.0192,
+        "roc_auc": 0.8667,
+        "pr_auc": 0.6962
+      },
+      "sequence": {
+        "tp": 227,
+        "fp": 109,
+        "tn": 724,
+        "fn": 90,
+        "precision": 0.6756,
+        "recall": 0.7161,
+        "f1": 0.6953,
+        "fpr": 0.1309,
+        "roc_auc": 0.8186,
+        "pr_auc": 0.7338
+      },
+      "combined_v2_0": {
+        "tp": 297,
+        "fp": 321,
+        "tn": 512,
+        "fn": 20,
+        "precision": 0.4806,
+        "recall": 0.9369,
+        "f1": 0.6353,
+        "fpr": 0.3854,
+        "score_auc": {
+          "roc_auc": 0.9173,
+          "pr_auc": 0.8185
+        }
+      }
+    }
+  }
+}
