@@ -137,9 +137,10 @@ if result is not None:
         st.dataframe(view[show_cols].head(500), hide_index=True,
                      width='stretch', alt='Analyzed security events')
 
+        from modules.export import export_csv
         st.download_button(
             "Download filtered events (CSV)",
-            filtered[show_cols].to_csv(index=False),
+            export_csv(filtered[show_cols]),
             "events.csv", "text/csv", width='stretch',
             key='ev_download')
 

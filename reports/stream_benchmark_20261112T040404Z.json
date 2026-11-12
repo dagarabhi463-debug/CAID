@@ -1,0 +1,64 @@
+{
+  "benchmark": "milestone_2_5_streaming",
+  "mode": "soak",
+  "target_rate_eps": 100.0,
+  "duration_s": 120.0,
+  "events_produced": 12000,
+  "events_processed": 12000,
+  "events_dead_lettered": 0,
+  "dlq_reasons": {},
+  "events_rejected": 0,
+  "events_duplicate": 0,
+  "events_inflight": 0,
+  "events_lost": 0,
+  "dlq_depth": 0,
+  "queue_impl": "asyncio",
+  "batch_size": 100,
+  "reorder_window": 0,
+  "reorder_window_s": 0.05,
+  "max_hold_s": 0.5,
+  "preload": false,
+  "warmup_events": 200,
+  "wall_seconds": 120.006,
+  "effective_eps": 100.0,
+  "latency": {
+    "count": 12000,
+    "p50": 0.037254,
+    "p95": 0.783371,
+    "p99": 0.880142,
+    "min": 0.020206,
+    "max": 1.300672,
+    "mean": 0.09907783658333333
+  },
+  "counters": {
+    "caid_events_received_total": 12000.0
+  },
+  "gauges": {
+    "caid_queue_depth": 0.0
+  },
+  "artifact_statuses": {
+    "detector": "loaded",
+    "feature_baseline": null,
+    "behavioral_baseline": "loaded",
+    "session_baseline": "loaded",
+    "sequence_model": "loaded"
+  },
+  "calibration_statuses": {
+    "risk": "calibrated",
+    "detection": "calibrated",
+    "threshold_version": "cal-20261112T035409Z-2962264f"
+  },
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.6",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "machine": "AMD64"
+  },
+  "redis_url": "redis://127.0.0.1:6379/0",
+  "notes": [
+    "Synthetic events only; labels stripped.",
+    "Scores are calibrated anomaly scores, not probabilities.",
+    "Redis impl supports Redis >= 5.0; XAUTOCLAIM is used when available and XPENDING/XCLAIM fallback covers Redis 5.x.",
+    "events_lost counts only produced events with no scored result, DLQ record, duplicate status, or explicit rejection."
+  ]
+}

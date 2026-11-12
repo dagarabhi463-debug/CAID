@@ -91,6 +91,9 @@ class SessionBaselineManager:
         self._is_fitted = False
         self._fit_event_count = 0
         self._fit_session_count = 0
+        # Ephemeral runtime status set by ensure_fitted_session_analyzer:
+        # 'loaded' | 'refit_fallback_missing' | 'refit_fallback_corrupt'
+        self.artifact_status: Optional[str] = None
 
     # ------------------------------------------------------------------
     # Helpers
@@ -122,11 +125,15 @@ class SessionBaselineManager:
         text = str(value).strip()
         return text if text else 'unknown'
 
-    def _feature_value(self, row: pd.Series, col: str) -> Tuple[Optional[float], bool]:
-        if col not in row.index:
+    def _feature_value(self, row, col: str) -> Tuple[Optional[float], bool]:
+        try:
+            present = col in row.index if hasattr(row, 'index') else col in row
+        except Exception:
+            present = col in row
+        if not present:
             return None, False
         try:
-            v = float(row[col])
+            v = float(row[col] if hasattr(row, 'index') else row.get(col))
         except (TypeError, ValueError):
             return None, False
         if not np.isfinite(v):

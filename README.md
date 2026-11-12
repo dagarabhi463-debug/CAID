@@ -17,7 +17,7 @@ CAID is a defensive, AI-powered security monitoring and anomaly detection platfo
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.11+ (audited on 3.14)
 - Windows 10/11
 
 ### Setup
@@ -45,71 +45,68 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+### Configuration
+
+Copy `.env.example` to `.env` for reference values. **The app does not
+auto-load `.env`** — export the variables into your environment (or source
+the file) before launching:
+
+- `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_TIMEOUT` — local Ollama server
+- `REDIS_URL` — Redis Streams queue for streaming ingestion (optional;
+  defaults to `redis://127.0.0.1:6379/0`)
+
 ## Project Structure
 
 ```
-CAID/
-├── app.py                  # Main application entry point
-├── config.py               # Configuration settings
+web-project/
+├── app.py                  # Main application entry point (multipage)
 ├── requirements.txt        # Python dependencies
-├── README.md              # This file
+├── .env.example            # Ollama configuration template
 │
-├── data/                  # Data files
-│   ├── raw/              # Raw synthetic datasets
-│   └── processed/        # Processed data
-│
-├── models/                # ML models
-│   ├── anomaly_detector.py
-│   ├── train_model.py
-│   └── saved_models/
-│
-├── core/                  # Core business logic
-│   ├── log_processor.py
-│   ├── feature_engineering.py
-│   ├── risk_engine.py
-│   └── incident_analyzer.py
-│
-├── ai/                    # AI/ML features
-│   ├── ai_explainer.py
-│   ├── mitre_mapper.py
-│   └── prompt_templates.py
-│
-├── modules/               # Application modules
-│   ├── dashboard.py
-│   ├── log_analysis.py
-│   ├── threat_detection.py
-│   └── reports.py
-│
-├── utils/                 # Utility functions
-│   ├── helpers.py
-│   ├── validators.py
-│   └── export_utils.py
-│
-├── tests/                 # Automated tests
-│
-├── docs/                  # Documentation
-│
-└── reports/               # Generated reports
-    └── generated_reports/
+├── app_pages/              # Streamlit pages (13)
+├── core/                   # Detection & analytics engine
+│   ├── detection_engine.py #   Channel-weighted fused scoring
+│   ├── calibration.py      #   Fingerprint-bound threshold artifacts
+│   ├── drift_monitor.py    #   Observational distribution drift (M2.4)
+│   └── ...                 #   log/rules/risk/session/sequence/correlation/
+│                           #   incidents/MITRE/AI modules
+├── models/                 # anomaly_detector.py + saved_models/
+├── modules/                # Streamlit UI/state layer
+├── data/                   # raw/, processed/, scenarios, incidents, MITRE cache
+├── utils/validators.py     # CSV schema validation & cleaning
+├── scripts/                # benchmark_models.py, evaluate_fusion.py (M2.4)
+├── tests/                  # pytest suite
+├── docs/                   # audit/, architecture/, research/,
+│                           # testing/, roadmap/
+└── reports/                # generated_reports/ + benchmark JSON output
 ```
+
+See `PROJECT_DOCUMENTATION.md` for the full architecture reference
+and `docs/` for milestone deliverables.
 
 ## Development
 
 ### Running Tests
 
 ```powershell
-pytest tests/ -v
+pytest tests -q
+```
+
+### Benchmarks (Milestone 2.4)
+
+```powershell
+.venv\Scripts\python scripts\benchmark_models.py   # ML model comparison
+.venv\Scripts\python scripts\evaluate_fusion.py    # channel fusion eval
 ```
 
 ### Project Milestones
 
-- **Milestone 1**: Foundation and dashboard
-- **Milestone 2**: Synthetic dataset and log processing
-- **Milestone 3**: Isolation Forest anomaly detection
-- **Milestone 4**: Risk scoring and threat classification
-- **Milestone 5**: AI incident explanation
-- **Milestone 6**: MITRE ATT&CK mapping
-- **Milestone 7**: Incident reports and PDF export
+- **Milestones 1.x–2.3**: dashboard, log processing, Isolation Forest,
+  risk scoring, behavioral/session/sequence detection, correlation,
+  incidents, MITRE mapping, AI analyst, scenarios
+- **Milestone 2.4**: repository audit, test remediation, ML benchmark
+  framework, drift monitoring, fusion validation, real-time IDS
+  architecture design — see `docs/`
 
 ## License
 

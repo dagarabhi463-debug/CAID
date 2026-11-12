@@ -12,6 +12,9 @@ def get_store() -> MitreAttackStore:
 
 
 store = get_store()
+# Load the cached STIX bundle on first visit; only offer the download
+# button when no usable local data exists.
+store.ensure_data(allow_download=False)
 st.subheader("MITRE ATT&CK")
 st.caption(
     "Mappings link CAID detection rules, correlation findings, and event "

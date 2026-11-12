@@ -1,7 +1,51 @@
 [theme]
 base = "dark"
-primaryColor = "#00d9ff"
-backgroundColor = "#0a0a15"
-secondaryBackgroundColor = "#111126"
-textColor = "#e8e8f0"
-font = "sans serif"
+primaryColor = "#7957FF"
+backgroundColor = "#080B16"
+secondaryBackgroundColor = "#0D1222"
+textColor = "#F4F6FF"
+linkColor = "#27C8F5"
+borderColor = "#26324D"
+codeBackgroundColor = "#111A2D"
+codeTextColor = "#DDE5FA"
+redColor = "#FF4D70"
+orangeColor = "#FFB547"
+yellowColor = "#FFD166"
+greenColor = "#19D9A0"
+blueColor = "#27C8F5"
+violetColor = "#7957FF"
+grayColor = "#929CB5"
+chartCategoricalColors = ["#7957FF", "#27C8F5", "#19D9A0", "#FFB547", "#FF4D70", "#A78BFA", "#64748B"]
+chartSequentialColors = ["#111A2D", "#1B2440", "#27324F", "#34456B", "#45588A", "#5E6FA8", "#7B8BC4", "#9AA8D6", "#BAC6E8", "#E8EDFF"]
+dataframeBorderColor = "#26324D"
+dataframeHeaderBackgroundColor = "#17223A"
+dataframeHeaderTextColor = "#F4F6FF"
+baseRadius = "12px"
+buttonRadius = "10px"
+showWidgetBorder = true
+showSidebarBorder = true
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap"
+codeFont = "JetBrains Mono:https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+baseFontSize = 14
+baseFontWeight = 400
+codeFontSize = "13px"
+headingFontSizes = ["30px", "24px", "20px", "17px", "15px", "13px"]
+headingFontWeights = [700, 650, 600, 600, 550, 500]
+metricValueFontSize = "1.9rem"
+metricValueFontWeight = 700
+linkUnderline = false
+paddingTop = "1rem"
+paddingBottom = "2.5rem"
+
+[theme.sidebar]
+backgroundColor = "#0A1020"
+secondaryBackgroundColor = "#111A2D"
+codeBackgroundColor = "#17223A"
+codeTextColor = "#DDE5FA"
+textColor = "#F4F6FF"
+borderColor = "#26324D"
+primaryColor = "#27C8F5"
+linkColor = "#27C8F5"
+paddingTop = "0.75rem"
+paddingBottom = "1.5rem"

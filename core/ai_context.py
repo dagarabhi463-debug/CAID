@@ -199,6 +199,108 @@ def incident_context(incident: Dict) -> Dict:
             'limitations': limitations or ['None identified.']}
 
 
+def attack_chain_context(incident: Dict,
+                         scored_df: Optional[pd.DataFrame] = None,
+                         mitre_mappings: Optional[List[Dict]] = None) -> Dict:
+    """Grounded evidence bundle for retrospective attack-chain analysis."""
+    import json
+    facts = {
+        'incident_id': sanitize_for_prompt(incident.get('incident_id'), 80),
+        'title': sanitize_for_prompt(incident.get('title'), 200),
+        'severity': sanitize_for_prompt(incident.get('severity'), 40),
+        'status': sanitize_for_prompt(incident.get('status'), 40),
+        'entity_users': sanitize_for_prompt(
+            incident.get('entity_users'), 300),
+        'entity_sessions_count': len(incident.get('entity_sessions') or []),
+        'entity_ips': sanitize_for_prompt(incident.get('entity_ips'), 300),
+        'finding_count': len(incident.get('findings') or []),
+        'finding_types': sanitize_for_prompt(
+            sorted({str(f.get('correlation_type'))
+                    for f in (incident.get('findings') or [])
+                    if f.get('correlation_type')}), 300),
+        'mitre_mapping_count': len(mitre_mappings or []),
+    }
+    evidence = []
+    findings = sorted(
+        incident.get('findings') or [],
+        key=lambda f: float(f.get('correlation_score') or 0.0),
+        reverse=True)
+    for f in findings[:12]:
+        evidence.append(
+            f"Finding {sanitize_for_prompt(f.get('correlation_id'), 60)}: "
+            f"{sanitize_for_prompt(f.get('correlation_type'), 60)} "
+            f"score={f.get('correlation_score')} "
+            f"shared_ip_only={bool(f.get('shared_ip_only'))}")
+        ev = f.get('evidence')
+        if ev:
+            evidence.append("  evidence: " + sanitize_for_prompt(
+                json.dumps(ev, default=str), 700))
+    for m in (mitre_mappings or [])[:12]:
+        evidence.append(
+            f"ATT&CK {sanitize_for_prompt(m.get('technique_id'), 30)} "
+            f"{sanitize_for_prompt(m.get('technique_name'), 120)} "
+            f"tactic={sanitize_for_prompt(m.get('tactic'), 80)} "
+            f"confidence={sanitize_for_prompt(m.get('confidence'), 40)}")
+
+    event_count = 0
+    if scored_df is not None and len(scored_df):
+        users = set(map(str, incident.get('entity_users') or []))
+        sessions = set(map(str, incident.get('entity_sessions') or []))
+        ips = set(map(str, incident.get('entity_ips') or []))
+        mask = pd.Series(False, index=scored_df.index)
+        if users and 'user_id' in scored_df.columns:
+            mask |= scored_df['user_id'].astype(str).isin(users)
+        if sessions and 'session_id' in scored_df.columns:
+            mask |= scored_df['session_id'].astype(str).isin(sessions)
+        if ips and 'source_ip' in scored_df.columns:
+            mask |= scored_df['source_ip'].astype(str).isin(ips)
+        sub = scored_df[mask]
+        event_count = int(len(sub))
+        if event_count:
+            evidence.append(
+                f"Matched {event_count} scored events for incident entities.")
+            top = sub.sort_values(
+                'combined_score' if 'combined_score' in sub.columns
+                else sub.columns[0], ascending=False).head(8)
+            for _, r in top.iterrows():
+                evidence.append(
+                    "top_event: " + sanitize_for_prompt({
+                        'timestamp': r.get('timestamp'),
+                        'user_id': r.get('user_id'),
+                        'session_id': r.get('session_id'),
+                        'source_ip': r.get('source_ip'),
+                        'event_type': r.get('event_type'),
+                        'combined_score': r.get('combined_score'),
+                        'risk_level': r.get('risk_level'),
+                    }, 500))
+        else:
+            evidence.append("No scored events matched incident entities.")
+    else:
+        event_count = 0
+
+    limitations = []
+    if facts['finding_count'] == 0:
+        limitations.append("Incident has no linked correlation findings.")
+    if any(f.get('shared_ip_only') for f in findings):
+        limitations.append(
+            "Contains shared-IP-only findings — low-confidence leads, "
+            "not proof of coordination.")
+    if event_count == 0:
+        limitations.append("No event-level evidence matched incident entities.")
+    if not mitre_mappings:
+        limitations.append("No MITRE ATT&CK mappings available for this incident.")
+    else:
+        limitations.append(
+            "ATT&CK mappings are potential/defensive research mappings, "
+            "not confirmed attacker behavior.")
+    limitations.append(
+        "Attack-chain reconstruction is retrospective and does not alter "
+        "detection scores, thresholds, or incident state.")
+    return {'facts': facts, 'evidence': evidence,
+            'limitations': limitations or ['None identified.'],
+            'matched_event_count': event_count}
+
+
 # ----------------------------------------------------------------------
 # Safe threat-hunting queries
 # ----------------------------------------------------------------------
@@ -260,6 +362,66 @@ def _q_ip_findings(df: pd.DataFrame) -> pd.DataFrame:
     return susp.groupby('source_ip').size().reset_index(name='events')
 
 
+def _q_after_hours_sensitive(df: pd.DataFrame) -> pd.DataFrame:
+    sensitive = {'grade_download', 'student_export', 'course_export',
+                 'bulk_download', 'bulk_export'}
+    if not {'event_type', 'user_id'}.issubset(df.columns):
+        return pd.DataFrame()
+    mask = df['event_type'].isin(sensitive)
+    if 'after_hours' in df.columns:
+        mask &= pd.to_numeric(df['after_hours'], errors='coerce').fillna(0) != 0
+    sub = df[mask]
+    if 'combined_score' in sub.columns:
+        return sub.groupby('user_id').agg(
+            events=('event_type', 'size'),
+            max_score=('combined_score', 'max')).reset_index().sort_values(
+            'max_score', ascending=False)
+    return sub.groupby('user_id').size().reset_index(name='events')
+
+
+def _q_auth_failure_bursts(df: pd.DataFrame) -> pd.DataFrame:
+    if not {'auth_result', 'user_id'}.issubset(df.columns):
+        return pd.DataFrame()
+    fails = df[df['auth_result'].astype(str).str.lower() == 'failure']
+    if fails.empty:
+        return fails
+    out = fails.groupby(['user_id', 'session_id']).size().reset_index(
+        name='failed_events') if 'session_id' in fails.columns else \
+        fails.groupby('user_id').size().reset_index(name='failed_events')
+    return out[out['failed_events'] >= 3].sort_values(
+        'failed_events', ascending=False)
+
+
+def _q_shared_ip_multiuser(df: pd.DataFrame) -> pd.DataFrame:
+    if not {'source_ip', 'user_id'}.issubset(df.columns):
+        return pd.DataFrame()
+    if 'combined_score' in df.columns:
+        susp = df[pd.to_numeric(df['combined_score'], errors='coerce') >= 0.4]
+    else:
+        susp = df
+    agg = {'users': ('user_id', 'nunique'), 'events': ('user_id', 'size')}
+    if 'combined_score' in susp.columns:
+        agg['max_score'] = ('combined_score', 'max')
+    g = susp.groupby('source_ip').agg(**agg).reset_index()
+    return g[g['users'] >= 2].sort_values('users', ascending=False)
+
+
+def _q_sensitive_breadth(df: pd.DataFrame) -> pd.DataFrame:
+    sensitive = {'grade_download', 'student_export', 'course_export',
+                 'bulk_download', 'bulk_export'}
+    if not {'event_type', 'user_id'}.issubset(df.columns):
+        return pd.DataFrame()
+    sub = df[df['event_type'].isin(sensitive)]
+    if sub.empty:
+        return sub
+    g = sub.groupby('user_id').agg(
+        sensitive_events=('event_type', 'size'),
+        unique_sensitive=('event_type', 'nunique')).reset_index()
+    return g[(g['sensitive_events'] >= 3) &
+             (g['unique_sensitive'] >= 2)].sort_values(
+        'sensitive_events', ascending=False)
+
+
 THREAT_HUNT_QUERIES: List[Dict] = [
     {
         'id': 'repeated_suspicious_sessions',
@@ -296,6 +458,34 @@ THREAT_HUNT_QUERIES: List[Dict] = [
         'keywords': ['ip', 'shared', 'address'],
         'fn': _q_ip_findings,
         'describe': lambda r: f"{len(r)} source IPs with suspicious events",
+    },
+    {
+        'id': 'after_hours_sensitive',
+        'label': 'After-hours sensitive operations',
+        'keywords': ['after', 'hours', 'sensitive', 'night', 'late'],
+        'fn': _q_after_hours_sensitive,
+        'describe': lambda r: f"{len(r)} users with after-hours sensitive ops",
+    },
+    {
+        'id': 'auth_failure_bursts',
+        'label': 'Authentication failure bursts',
+        'keywords': ['auth', 'failure', 'burst', 'brute', 'login'],
+        'fn': _q_auth_failure_bursts,
+        'describe': lambda r: f"{len(r)} user/session auth-failure bursts",
+    },
+    {
+        'id': 'shared_ip_multiuser',
+        'label': 'Shared IPs used by multiple users',
+        'keywords': ['shared', 'ip', 'multi', 'users', 'address'],
+        'fn': _q_shared_ip_multiuser,
+        'describe': lambda r: f"{len(r)} shared IPs with multiple users",
+    },
+    {
+        'id': 'sensitive_breadth',
+        'label': 'Users with broad sensitive-operation activity',
+        'keywords': ['sensitive', 'breadth', 'export', 'download', 'bulk'],
+        'fn': _q_sensitive_breadth,
+        'describe': lambda r: f"{len(r)} users with broad sensitive activity",
     },
 ]
 

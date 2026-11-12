@@ -317,3 +317,67 @@ class TestEndToEndScenarios:
         """Events that trigger rules must have rule_score > 0 in output."""
         export = pipeline_df[pipeline_df['event_type'] == 'bulk_download'].iloc[0]
         assert export['rule_score'] > 0 or export['rules_triggered'] > 0
+
+
+class TestLegacyAnomalyScoreAlias:
+    """AUD-001: pin the INTENTIONAL divergent interpretation of the
+    deprecated ``anomaly_score`` field (documented in
+    docs/architecture/detection_engine_architecture.md §6).
+
+    - RiskEngine: always raw decision_function -> inverted
+      (0.8 -> normalized anomaly ~0.0, LOW ml contribution)
+    - DetectionEngine: in-range [0,1] -> already normalized
+      (0.8 -> ml_anomaly_score 0.8, HIGH ml channel)
+    - Explicit fields (anomaly_score_raw / anomaly_score_normalized)
+      always take precedence over the alias.
+    """
+
+    @staticmethod
+    def _row(**overrides):
+        base = {'user_id': 'u_alias', 'timestamp': '2024-03-01 10:00:00',
+                'api_requests': 0, 'data_mb': 0.0, 'courses_accessed': 0,
+                'accounts_accessed': 0, 'after_hours': 0,
+                'token_age_minutes': 0}
+        base.update(overrides)
+        return pd.Series(base)
+
+    def test_risk_engine_inverts_alias_as_raw(self):
+        engine = RiskEngine()
+        _, factors = engine.calculate_risk_score(
+            self._row(anomaly_score=0.8))
+        ml = [f for f in factors if f['factor'] == 'ML Anomaly Score'][0]
+        # raw 0.8 -> -0.8 clipped to 0.0: LOW anomaly contribution
+        assert ml['normalized_value'] == pytest.approx(0.0)
+        assert 'inverted' in ml['score_source']
+
+    def test_detection_engine_reads_inrange_alias_as_normalized(self):
+        engine = DetectionEngine()
+        det = engine.process_event(self._row(anomaly_score=0.8))
+        assert det.ml_anomaly_score == pytest.approx(0.8)
+
+    def test_divergence_on_identical_input_is_pinned(self):
+        """Same row -> the two engines intentionally disagree; this test
+        fails if either adapter is 'fixed' silently."""
+        row = self._row(anomaly_score=0.8)
+        _, factors = RiskEngine().calculate_risk_score(row)
+        ml_risk = [f for f in factors
+                   if f['factor'] == 'ML Anomaly Score'][0]
+        det = DetectionEngine().process_event(row)
+        assert ml_risk['normalized_value'] < 0.1
+        assert det.ml_anomaly_score > 0.7
+
+    def test_detection_engine_alias_out_of_range_treated_as_raw(self):
+        engine = DetectionEngine()
+        det = engine.process_event(self._row(anomaly_score=-0.2))
+        # out-of-range -> raw decision_function, inverted: clip(-(-0.2))
+        assert det.ml_anomaly_score == pytest.approx(0.2)
+
+    def test_explicit_normalized_field_beats_alias(self):
+        """anomaly_score_normalized takes precedence over the alias in
+        both engines — the migration path off the deprecated field."""
+        row = self._row(anomaly_score=0.8, anomaly_score_normalized=0.1)
+        _, factors = RiskEngine().calculate_risk_score(row)
+        ml = [f for f in factors if f['factor'] == 'ML Anomaly Score'][0]
+        assert ml['normalized_value'] == pytest.approx(0.1)
+        det = DetectionEngine().process_event(row)
+        assert det.ml_anomaly_score == pytest.approx(0.1)

@@ -59,6 +59,9 @@ class AnomalyDetector:
         self.feature_columns: List[str] = []
         self._scaler_fitted = False
         self._score_calibration: Optional[dict] = None
+        # Ephemeral runtime status set by ensure_model_exists:
+        # 'loaded' | 'refit_fallback_missing' | 'refit_fallback_corrupt'
+        self.artifact_status: Optional[str] = None
     
     def fit(self, df: pd.DataFrame, feature_columns: Optional[List[str]] = None) -> 'AnomalyDetector':
         """
@@ -439,30 +442,54 @@ def ensure_model_exists() -> AnomalyDetector:
     3. Otherwise train using baseline dataset
     4. Save the trained model
     
+    Lifecycle policy (AUD-002, see core/artifact_lifecycle.py):
+    - loads cleanly            -> artifact_status = 'loaded'
+    - missing                  -> fit on normal baseline + persist,
+                                  'refit_fallback_missing'
+    - corrupt/incompatible     -> quarantine corrupt file, fit on normal
+                                  baseline + persist fresh,
+                                  'refit_fallback_corrupt'
+
     Returns:
-        Fitted AnomalyDetector instance
+        Fitted AnomalyDetector instance with ``artifact_status`` set.
     """
+    from core.artifact_lifecycle import (
+        STATUS_LOADED, STATUS_REFIT_MISSING, STATUS_REFIT_CORRUPT,
+        quarantine_corrupt)
+
     model_path = get_model_path()
     detector = AnomalyDetector()
-    
+
     # Try to load existing model
     if os.path.exists(model_path):
         try:
             detector.load(model_path)
+            detector.artifact_status = STATUS_LOADED
             print(f"Loaded existing model from {model_path}")
             return detector
         except Exception as e:
-            print(f"Failed to load model: {e}. Training new model...")
-    
+            quarantine = quarantine_corrupt(model_path)
+            print(f"Failed to load model: {e}. "
+                  f"Quarantined corrupt artifact to {quarantine}; "
+                  "training new model on normal baseline data...")
+            from core.log_processor import load_sample_dataset
+            df_normal = load_sample_dataset('normal')
+            detector.fit(df_normal)
+            detector.save(model_path)
+            detector.artifact_status = STATUS_REFIT_CORRUPT
+            print(f"Saved model to {model_path}")
+            return detector
+
     # Train new model using baseline dataset
     from core.log_processor import load_sample_dataset
-    
+
     print("Training new model using normal_activity.csv as baseline...")
     df_normal = load_sample_dataset('normal')
     detector.fit(df_normal)
-    
+
     # Save the trained model
     detector.save(model_path)
+    detector.artifact_status = STATUS_REFIT_MISSING
     print(f"Saved model to {model_path}")
-    
+
     return detector

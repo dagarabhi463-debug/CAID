@@ -1,0 +1,113 @@
+{
+  "manifest": "milestone_2_4_v2_detection_calibration",
+  "dataset_role": "calibration",
+  "seed": 42,
+  "source_files": [
+    "data\\raw\\security_logs.csv",
+    "data\\processed\\evaluation_data.csv"
+  ],
+  "calibration_split": {
+    "rows": 73,
+    "users": 70,
+    "labels": {
+      "normal": 73
+    }
+  },
+  "entity_disjoint_across_splits": true,
+  "split_counts": {
+    "unsup_train": 179,
+    "calibration": 73,
+    "sup_train": 227,
+    "validation": 123,
+    "holdout": 133
+  },
+  "normal_activity_user_overlap": {
+    "normal_activity_users": 487,
+    "overlap_users": 65,
+    "overlap_user_ids": [
+      "user_1188",
+      "user_1230",
+      "user_1478",
+      "user_1601",
+      "user_1699",
+      "user_1833",
+      "user_1998",
+      "user_2229",
+      "user_2388",
+      "user_2776",
+      "user_2879",
+      "user_2885",
+      "user_3149",
+      "user_3420",
+      "user_3527",
+      "user_3546",
+      "user_3683",
+      "user_3852",
+      "user_3870",
+      "user_4012",
+      "user_4115",
+      "user_4295",
+      "user_4485",
+      "user_4621",
+      "user_4629",
+      "user_4878",
+      "user_5082",
+      "user_5105",
+      "user_5334",
+      "user_5336",
+      "user_5397",
+      "user_5506",
+      "user_5511",
+      "user_5661",
+      "user_5911",
+      "user_6185",
+      "user_6362",
+      "user_6370",
+      "user_6464",
+      "user_6491",
+      "user_6802",
+      "user_6928",
+      "user_7176",
+      "user_7203",
+      "user_7232",
+      "user_7253",
+      "user_7274",
+      "user_7548",
+      "user_7691",
+      "user_7870"
+    ],
+    "note": "detector trains ONLY on normal_activity.csv rows; overlap means shared user_ids, not shared rows"
+  },
+  "risk_percentiles": [
+    30.0,
+    65.0,
+    85.0
+  ],
+  "detection_percentiles": [
+    90.0,
+    99.0,
+    99.9
+  ],
+  "detection_thresholds": {
+    "medium": 0.13318132745652034,
+    "high": 0.2006722315725792,
+    "critical": 0.23205835392125862
+  },
+  "risk_thresholds": {
+    "medium": 0.09405127269077865,
+    "high": 0.12879669848943523,
+    "critical": 0.19073172159870047
+  },
+  "fingerprints": {
+    "detector": "0cde9fd80c5f6d2d-3ab7b78cf14b2f21",
+    "feature_baseline": "86db8d2cac500575",
+    "behavioral_baseline": "faca251e9f002dc5-e2209399837c6e3e",
+    "session_baseline": "23f59a7a92686d23",
+    "sequence_model": "52b1c7fe4a9a49e2"
+  },
+  "notes": [
+    "Calibration rows are normal-labeled, entity-disjoint from all other benchmark splits; used ONLY for threshold derivation.",
+    "Detector/session/sequence/behavioral components are the persisted production artifacts (fingerprint-bound).",
+    "Scores are calibrated anomaly scores, NOT probabilities."
+  ]
+}

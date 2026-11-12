@@ -338,13 +338,22 @@ def _scenario_mixed_campaign(seed: int = 2306) -> pd.DataFrame:
     The primary demo scenario — designed to produce multiple distinct
     incidents across all five correlation types.
     """
-    parts = [
-        _scenario_insider_exfiltration(seed),
-        _scenario_credential_stuffing_ring(seed + 1),
-        _scenario_after_hours_lab(seed + 2),
-        _scenario_low_and_slow(seed + 3),
+    component_generators = [
+        ('insider_exfiltration', _scenario_insider_exfiltration),
+        ('credential_stuffing_ring', _scenario_credential_stuffing_ring),
+        ('after_hours_lab', _scenario_after_hours_lab),
+        ('low_and_slow', _scenario_low_and_slow),
     ]
-    # Rename overlapping normal users is unnecessary (distinct prefixes).
+    if seed == SCENARIOS['mixed_campaign']['seed']:
+        # Default mixed campaign composes the canonical component
+        # scenarios so documented coverage (including low_and_slow drift)
+        # is preserved. Custom seeds keep deterministic offset behavior.
+        parts = [gen(SCENARIOS[name]['seed']) for name, gen in
+                 component_generators]
+    else:
+        parts = [gen(seed + i) for i, (_, gen) in
+                 enumerate(component_generators)]
+    # Component user prefixes are distinct, so no renaming is needed.
     df = pd.concat(parts, ignore_index=True)
     return df[COLUMNS]
 

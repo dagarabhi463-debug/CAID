@@ -17,6 +17,7 @@ from typing import Dict, List, Optional
 import pandas as pd
 
 from core.ai_context import (
+    attack_chain_context,
     event_context,
     finding_context,
     incident_context,
@@ -166,6 +167,85 @@ def summarize_incident(incident: Dict,
         resp['text'] = _fallback_summary(ctx, subject)
     resp['evidence_used'] = ctx['evidence']
     resp['context'] = ctx
+    return resp
+
+
+def _default_mitre_mappings(incident: Dict) -> List[Dict]:
+    try:
+        from core.mitre_attack import MitreAttackStore
+        store = MitreAttackStore()
+        if store.ensure_data(allow_download=False):
+            return store.map_incident(incident)
+    except Exception:
+        pass
+    return []
+
+
+def investigate_attack_chain(incident: Dict,
+                             scored_df: Optional[pd.DataFrame] = None,
+                             mitre_mappings: Optional[List[Dict]] = None,
+                             client: Optional[OllamaClient] = None,
+                             model: Optional[str] = None) -> Dict:
+    """Reconstruct a possible attack chain from grounded incident evidence."""
+    maps = mitre_mappings if mitre_mappings is not None else \
+        _default_mitre_mappings(incident)
+    ctx = attack_chain_context(incident, scored_df=scored_df,
+                               mitre_mappings=maps)
+    subject = f"incident {sanitize_for_prompt(incident.get('incident_id'), 60)}"
+    prompt = (
+        "Reconstruct a possible attack chain for this incident using ONLY "
+        "the evidence below. For each stage (initial access, execution, "
+        "collection/exfiltration, impact, or 'other'), state whether it is "
+        "OBSERVED, HYPOTHESIZED, or UNSUPPORTED, cite the evidence, and "
+        "give an overall confidence. Treat ATT&CK mappings as potential "
+        "research mappings, not confirmed attacker behavior. Do not "
+        "recommend changing detection state.\n\n"
+        f"{wrap_untrusted('attack_chain', _render_context(ctx))}\n\n"
+        f"Question: Investigate {subject} as an attack chain.")
+    resp = _ask(prompt, client=client, model=model)
+    if resp['degraded'] or not resp['text']:
+        resp['text'] = _fallback_summary(ctx, subject)
+    resp['evidence_used'] = ctx['evidence']
+    resp['context'] = ctx
+    resp['matched_event_count'] = ctx.get('matched_event_count', 0)
+    resp['mitre_mapping_count'] = len(maps or [])
+    return resp
+
+
+def generate_investigation_summary(incident: Dict,
+                                   scored_df: Optional[pd.DataFrame] = None,
+                                   mitre_mappings: Optional[List[Dict]] = None,
+                                   client: Optional[OllamaClient] = None,
+                                   model: Optional[str] = None) -> Dict:
+    """Generate an automated, read-only investigation summary."""
+    maps = mitre_mappings if mitre_mappings is not None else \
+        _default_mitre_mappings(incident)
+    inc_ctx = incident_context(incident)
+    chain_ctx = attack_chain_context(incident, scored_df=scored_df,
+                                     mitre_mappings=maps)
+    ctx = {
+        'facts': {**inc_ctx.get('facts', {}), **chain_ctx.get('facts', {})},
+        'evidence': (inc_ctx.get('evidence') or []) +
+                    (chain_ctx.get('evidence') or []),
+        'limitations': (inc_ctx.get('limitations') or []) +
+                       (chain_ctx.get('limitations') or []),
+    }
+    subject = f"incident {sanitize_for_prompt(incident.get('incident_id'), 60)}"
+    prompt = (
+        "Write an automated investigation summary for an analyst: overview, "
+        "affected entities, evidence timeline, correlation findings, "
+        "potential ATT&CK techniques, uncertainty/missing evidence, and "
+        "read-only next investigation steps. Do not change severity, "
+        "status, scores, thresholds, or incident state.\n\n"
+        f"{wrap_untrusted('investigation', _render_context(ctx))}\n\n"
+        f"Question: Summarize {subject} for investigation.")
+    resp = _ask(prompt, client=client, model=model)
+    if resp['degraded'] or not resp['text']:
+        resp['text'] = _fallback_summary(ctx, subject)
+    resp['evidence_used'] = ctx['evidence']
+    resp['context'] = ctx
+    resp['matched_event_count'] = chain_ctx.get('matched_event_count', 0)
+    resp['mitre_mapping_count'] = len(maps or [])
     return resp
 
 

@@ -89,11 +89,44 @@ def get_session_analyzer_path() -> str:
 def ensure_fitted_session_analyzer(path: Optional[str] = None,
                                    train_df: Optional[pd.DataFrame] = None
                                    ) -> SessionAnalyzer:
-    """Load persisted session baselines, or fit on provided training-normal data."""
+    """Load persisted session baselines, or fit on training-normal data.
+
+    Lifecycle policy (AUD-002, see core/artifact_lifecycle.py):
+    - loads cleanly            -> artifact_status = 'loaded'
+    - missing                  -> fit + persist, 'refit_fallback_missing'
+    - corrupt/incompatible     -> quarantine corrupt file, fit + persist
+                                  fresh, 'refit_fallback_corrupt'
+
+    ``train_df`` is used only when an artifact must be (re)fit; it must be
+    designated training-normal data. Once a usable artifact exists it is
+    loaded and ``train_df`` is ignored.
+    """
+    from core.artifact_lifecycle import (
+        STATUS_LOADED, STATUS_REFIT_MISSING, STATUS_REFIT_CORRUPT,
+        quarantine_corrupt)
+
     path = path or get_session_analyzer_path()
     if os.path.exists(path):
-        return SessionAnalyzer.from_baseline_path(path)
+        try:
+            analyzer = SessionAnalyzer.from_baseline_path(path)
+            analyzer.baseline_manager.artifact_status = STATUS_LOADED
+            return analyzer
+        except Exception as e:
+            quarantine = quarantine_corrupt(path)
+            print(f"Failed to load session baselines: {e}. "
+                  f"Quarantined corrupt artifact to {quarantine}; "
+                  "refitting on training-normal data...")
+            if train_df is None:
+                from core.log_processor import load_sample_dataset
+                train_df = load_sample_dataset('normal')
+            analyzer = SessionAnalyzer().fit(train_df)
+            analyzer.save(path)
+            analyzer.baseline_manager.artifact_status = STATUS_REFIT_CORRUPT
+            return analyzer
     if train_df is None:
         from core.log_processor import load_sample_dataset
         train_df = load_sample_dataset('normal')
-    return SessionAnalyzer().fit(train_df)
+    analyzer = SessionAnalyzer().fit(train_df)
+    analyzer.save(path)
+    analyzer.baseline_manager.artifact_status = STATUS_REFIT_MISSING
+    return analyzer

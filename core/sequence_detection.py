@@ -129,6 +129,9 @@ class SequenceAnalyzer:
         self._is_fitted = False
         self._fit_event_count = 0
         self._fit_session_count = 0
+        # Ephemeral runtime status set by ensure_fitted_sequence_analyzer:
+        # 'loaded' | 'refit_fallback_missing' | 'refit_fallback_corrupt'
+        self.artifact_status: Optional[str] = None
 
     # ------------------------------------------------------------------
     # Fit
@@ -608,11 +611,44 @@ def get_sequence_model_path() -> str:
 def ensure_fitted_sequence_analyzer(path: Optional[str] = None,
                                     train_df: Optional[pd.DataFrame] = None
                                     ) -> SequenceAnalyzer:
+    """Load persisted sequence model, or fit on training-normal data.
+
+    Lifecycle policy (AUD-002, see core/artifact_lifecycle.py):
+    - loads cleanly            -> artifact_status = 'loaded'
+    - missing                  -> fit + persist, 'refit_fallback_missing'
+    - corrupt/incompatible     -> quarantine corrupt file, fit + persist
+                                  fresh, 'refit_fallback_corrupt'
+
+    ``train_df`` is used only when an artifact must be (re)fit; it must be
+    designated training-normal data. Once a usable artifact exists it is
+    loaded and ``train_df`` is ignored.
+    """
+    from core.artifact_lifecycle import (
+        STATUS_LOADED, STATUS_REFIT_MISSING, STATUS_REFIT_CORRUPT,
+        quarantine_corrupt)
+
     path = path or get_sequence_model_path()
     if os.path.exists(path):
-        analyzer = SequenceAnalyzer()
-        return analyzer.load(path)
+        try:
+            analyzer = SequenceAnalyzer().load(path)
+            analyzer.artifact_status = STATUS_LOADED
+            return analyzer
+        except Exception as e:
+            quarantine = quarantine_corrupt(path)
+            print(f"Failed to load sequence model: {e}. "
+                  f"Quarantined corrupt artifact to {quarantine}; "
+                  "refitting on training-normal data...")
+            if train_df is None:
+                from core.log_processor import load_sample_dataset
+                train_df = load_sample_dataset('normal')
+            analyzer = SequenceAnalyzer().fit(train_df)
+            analyzer.save(path)
+            analyzer.artifact_status = STATUS_REFIT_CORRUPT
+            return analyzer
     if train_df is None:
         from core.log_processor import load_sample_dataset
         train_df = load_sample_dataset('normal')
-    return SequenceAnalyzer().fit(train_df)
+    analyzer = SequenceAnalyzer().fit(train_df)
+    analyzer.save(path)
+    analyzer.artifact_status = STATUS_REFIT_MISSING
+    return analyzer

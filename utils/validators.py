@@ -380,19 +380,26 @@ def validate_duplicate_records(df: pd.DataFrame) -> List[Dict[str, Any]]:
         List of duplicate issues (with count and percentage)
     """
     # Create a copy with hashable columns for duplicate detection
-    # Convert unhashable types (lists, dicts) to strings
+    # Convert unhashable types (lists, dicts, arrays) to strings.
+    # hash() is checked first so pd.isna() only ever sees scalars —
+    # array-like values would make pd.isna() return an array and
+    # produce an ambiguous truth value.
+    def _make_hashable(x):
+        try:
+            hash(x)
+        except TypeError:
+            return str(x)
+        try:
+            return '' if bool(pd.isna(x)) else x
+        except (TypeError, ValueError):
+            # Hashable but non-scalar (e.g. tuple): pd.isna() returns an
+            # array — stringify so duplicated() can compare it.
+            return str(x)
+
     df_check = df.copy()
     for col in df_check.columns:
         if df_check[col].dtype == 'object':
-            # Try to detect if column contains unhashable types
-            sample = df_check[col].dropna()
-            if len(sample) > 0:
-                first_val = sample.iloc[0]
-                if isinstance(first_val, (list, dict)):
-                    # Convert to string representation
-                    df_check[col] = df_check[col].apply(
-                        lambda x: str(x) if pd.notna(x) else ''
-                    )
+            df_check[col] = df_check[col].apply(_make_hashable)
     
     duplicate_mask = df_check.duplicated(keep=False)
     duplicate_count = duplicate_mask.sum()

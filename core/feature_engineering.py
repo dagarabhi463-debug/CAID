@@ -17,6 +17,11 @@ from typing import List, Tuple, Dict, Any, Optional
 from sklearn.preprocessing import StandardScaler
 
 
+def _str_col_with_unknown(series: pd.Series) -> pd.Series:
+    """NaN -> 'unknown' then str, without pandas-4 fillna dtype warnings."""
+    return series.astype('object').where(series.notna(), 'unknown').astype(str)
+
+
 class FeatureBaselineManager:
     """
     Manages pre-computed feature baselines from training data.
@@ -69,7 +74,7 @@ class FeatureBaselineManager:
         # Normalize key columns so missing values aggregate safely
         for col in ('user_id', 'source_ip', 'event_type'):
             if col in df.columns:
-                df[col] = df[col].fillna('unknown').astype(str)
+                df[col] = _str_col_with_unknown(df[col])
             else:
                 df[col] = 'unknown'
         
@@ -222,7 +227,7 @@ class FeatureBaselineManager:
         
         if 'user_id' not in df.columns:
             df['user_id'] = 'unknown'
-        df['user_id'] = df['user_id'].fillna('unknown').astype(str)
+        df['user_id'] = _str_col_with_unknown(df['user_id'])
         
         # Initialize columns
         for col in ('user_total_api', 'user_mean_api', 'user_max_api',
@@ -371,7 +376,7 @@ class FeatureBaselineManager:
         
         if 'source_ip' not in df.columns:
             df['source_ip'] = 'unknown'
-        df['source_ip'] = df['source_ip'].fillna('unknown').astype(str)
+        df['source_ip'] = _str_col_with_unknown(df['source_ip'])
         
         # Extract IP class (synthetic TEST-NET ranges only - simulation, not real reputation)
         df['ip_class'] = df['source_ip'].apply(lambda x: 
@@ -402,7 +407,7 @@ class FeatureBaselineManager:
         
         if 'event_type' not in df.columns:
             df['event_type'] = 'unknown'
-        df['event_type'] = df['event_type'].fillna('unknown').astype(str)
+        df['event_type'] = _str_col_with_unknown(df['event_type'])
         
         # Use pre-computed event type frequency
         df['event_type_frequency'] = df['event_type'].map(self.event_type_frequency).fillna(self._global_event_freq)
@@ -452,7 +457,7 @@ def extract_time_features(df: pd.DataFrame) -> pd.DataFrame:
     
     # Extract time components
     df['hour'] = df['timestamp'].dt.hour
-    df['day_of_week'] = df['timestamp'].dt.dayofweek
+    df['day_of_week'] = df['timestamp'].dt.day_of_week
     df['is_weekend'] = (df['day_of_week'] >= 5).astype(int)
     df['is_after_hours'] = ((df['hour'] < 6) | (df['hour'] > 22)).astype(int)
     

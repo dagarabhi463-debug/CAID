@@ -27,14 +27,12 @@ from core.calibration import (
 from core.behavioural_analyzer import ensure_fitted_analyzer
 from core.session_analyzer import ensure_fitted_session_analyzer
 from core.sequence_detection import ensure_fitted_sequence_analyzer
-from models.anomaly_detector import AnomalyDetector, get_model_path, ensure_model_exists
+from models.anomaly_detector import ensure_model_exists
 
 
 def analyze_session_intelligence(raw_df: pd.DataFrame) -> pd.DataFrame:
     """Run the additive v2.0 channel pipeline on a raw security-log frame."""
-    ensure_model_exists()
-    detector = AnomalyDetector()
-    detector.load(get_model_path())
+    detector = ensure_model_exists()
 
     out = detector.predict(raw_df.copy())
     risk = RiskEngine()
@@ -49,6 +47,28 @@ def analyze_session_intelligence(raw_df: pd.DataFrame) -> pd.DataFrame:
     sequence = ensure_fitted_sequence_analyzer(train_df=normal)
     out = session.analyze(out)
     out = sequence.analyze(out)
+
+    # AUD-002: surface artifact lifecycle statuses (loaded vs refit
+    # fallback) so operators can distinguish persisted artifacts from
+    # just-fit fallbacks. Statuses are ephemeral runtime metadata.
+    artifact_statuses = {
+        'detector': getattr(detector, 'artifact_status', None),
+        'feature_baseline': getattr(
+            getattr(detector, 'baseline_manager', None),
+            'artifact_status', None),
+        'behavioral_baseline': getattr(
+            getattr(behavioral, 'baseline_manager', None),
+            'artifact_status', None),
+        'session_baseline': getattr(
+            getattr(session, 'baseline_manager', None),
+            'artifact_status', None),
+        'sequence_model': getattr(sequence, 'artifact_status', None),
+    }
+    try:
+        st.session_state.artifact_statuses = artifact_statuses
+    except Exception:
+        pass
+    out.attrs['artifact_statuses'] = artifact_statuses
 
     engine = DetectionEngine(channel_profile='v2_0')
     cal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -144,6 +164,10 @@ def render_session_results(df: pd.DataFrame) -> None:
         if 'threshold_version' in df and df['threshold_version'].notna().any() else 'none'
     st.markdown(f"**Calibration:** risk={risk_status}; detection={det_status}; "
                 f"threshold_version={threshold_version}")
+    artifact_statuses = getattr(df, 'attrs', {}).get('artifact_statuses') or {}
+    if artifact_statuses:
+        st.markdown("**Artifact status:** " + ", ".join(
+            f"{k}={v}" for k, v in artifact_statuses.items()))
 
     # Retrospective session summary (not causal per-event alerts)
     st.subheader("Retrospective Session Risk Summary")
@@ -203,9 +227,10 @@ def render_session_results(df: pd.DataFrame) -> None:
                 else:
                     st.write(row.get('detection_explanation', 'No explanation'))
 
+    from modules.export import export_csv
     st.download_button(
         "Download Session Intelligence Results",
-        df.to_csv(index=False),
+        export_csv(df),
         "session_intelligence_results.csv",
         "text/csv",
     )

@@ -267,6 +267,42 @@ class TestReports:
         csv_text = generate_incident_csv(inc).decode('utf-8')
         assert 'shared_ip_only' in csv_text
 
+    def test_pdf_unicode_and_markup_content(self, mgr):
+        """Unicode, emoji, and markup-like text must not break PDF output."""
+        findings = [_finding('c1', entities=['usér_émoji😀'],
+                             sessions=['s1'], note='café <b>not html</b>')]
+        mgr.build_incidents(_corr_df(findings))
+        inc = mgr.store.incidents[0]
+        inc['title'] = 'Tëst ünïcode & symbols — ✓'
+        inc['notes'] = [{'timestamp': '2026-01-01', 'author': 'analyst',
+                         'text': 'nöte <script>alert(1)</script> ünïcode'}]
+        pdf = generate_incident_pdf(inc)
+        assert pdf[:5] == b'%PDF-'
+        assert len(pdf) > 1000
+        csv_text = generate_incident_csv(inc).decode('utf-8')
+        assert 'analyst' in csv_text
+
+    def test_pdf_empty_findings_and_long_evidence(self):
+        """Incidents with no findings and oversized evidence still render."""
+        inc = {
+            'incident_id': 'inc_edge', 'title': 'edge', 'status': 'Open',
+            'severity': 'Low', 'source': 'test',
+            'created_at': '2026-01-01', 'updated_at': '2026-01-01',
+            'entity_users': [], 'entity_sessions': [], 'entity_ips': [],
+            'findings': [], 'notes': [],
+        }
+        assert generate_incident_pdf(inc)[:5] == b'%PDF-'
+        inc['findings'] = [{
+            'correlation_id': 'c1', 'correlation_type': 'shared_ip_activity',
+            'entities': ['u1'], 'sessions': ['s1'], 'correlation_score': 0.4,
+            'shared_ip_only': True, 'operating_note': 'x' * 2000,
+            'evidence': [{'signal': 's', 'observed_value': 'v' * 1000,
+                          'expected_baseline_or_threshold': 'e',
+                          'explanation': 'expl'}],
+        }]
+        pdf = generate_incident_pdf(inc)
+        assert pdf[:5] == b'%PDF-'
+
 
 class TestEvidenceTimeline:
     def test_timeline_filters_and_orders(self, mgr):

@@ -1,0 +1,339 @@
+{
+  "benchmark": "milestone_2_7_detection_quality",
+  "validation_scope": "internal_reproducibility",
+  "independent_validation": "not_performed_current_data_only",
+  "unseen_user_evaluation": {
+    "validation_rows": 123,
+    "holdout_rows": 133,
+    "validation_users": 120,
+    "holdout_users": 125,
+    "entity_disjoint": true,
+    "validation_threshold": {
+      "threshold": 0.327077,
+      "tp": 31,
+      "fp": 0,
+      "tn": 92,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0
+    },
+    "holdout_default_risk_level": {
+      "tp": 35,
+      "fp": 3,
+      "tn": 95,
+      "fn": 0,
+      "precision": 0.9211,
+      "recall": 1.0,
+      "f1": 0.9589,
+      "fpr": 0.0306
+    },
+    "holdout_score_auc": {
+      "roc_auc": 1.0,
+      "pr_auc": 0.9714
+    },
+    "holdout_threshold_applied": {
+      "tp": 34,
+      "fp": 0,
+      "tn": 98,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.9714,
+      "f1": 0.9855,
+      "fpr": 0.0
+    },
+    "holdout_score_by_label": {
+      "high_risk": {
+        "count": 14,
+        "mean": 0.6715,
+        "p95": 0.739
+      },
+      "normal": {
+        "count": 98,
+        "mean": 0.0861,
+        "p95": 0.1577
+      },
+      "suspicious": {
+        "count": 21,
+        "mean": 0.4119,
+        "p95": 0.4872
+      }
+    },
+    "holdout_calibration_status": {
+      "risk": "calibrated",
+      "detection": "calibrated",
+      "threshold_version": "cal-20261112T035409Z-2962264f"
+    }
+  },
+  "synthetic_scenarios": {
+    "baseline": {
+      "rows": 150,
+      "labels": {
+        "normal": 150
+      },
+      "default_risk_level": {
+        "tp": 0,
+        "fp": 7,
+        "tn": 143,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0467
+      },
+      "score_auc": {
+        "roc_auc": null,
+        "pr_auc": null
+      },
+      "operating_modes": {
+        "full_v2_0": 150
+      },
+      "calibration_status": {
+        "risk": "calibrated",
+        "detection": "calibrated",
+        "threshold_version": "cal-20261112T035409Z-2962264f"
+      },
+      "score_by_label": {
+        "normal": {
+          "count": 150,
+          "mean": 0.1222,
+          "p95": 0.1995
+        }
+      }
+    },
+    "insider_exfiltration": {
+      "rows": 92,
+      "labels": {
+        "normal": 66,
+        "suspicious": 13,
+        "high_risk": 13
+      },
+      "default_risk_level": {
+        "tp": 26,
+        "fp": 7,
+        "tn": 59,
+        "fn": 0,
+        "precision": 0.7879,
+        "recall": 1.0,
+        "f1": 0.8814,
+        "fpr": 0.1061
+      },
+      "score_auc": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9615
+      },
+      "operating_modes": {
+        "full_v2_0": 92
+      },
+      "calibration_status": {
+        "risk": "calibrated",
+        "detection": "calibrated",
+        "threshold_version": "cal-20261112T035409Z-2962264f"
+      },
+      "score_by_label": {
+        "high_risk": {
+          "count": 13,
+          "mean": 0.6815,
+          "p95": 0.7728
+        },
+        "normal": {
+          "count": 66,
+          "mean": 0.1337,
+          "p95": 0.228
+        },
+        "suspicious": {
+          "count": 13,
+          "mean": 0.5369,
+          "p95": 0.6624
+        }
+      }
+    },
+    "credential_stuffing_ring": {
+      "rows": 74,
+      "labels": {
+        "normal": 48,
+        "suspicious": 20,
+        "high_risk": 6
+      },
+      "default_risk_level": {
+        "tp": 26,
+        "fp": 6,
+        "tn": 42,
+        "fn": 0,
+        "precision": 0.8125,
+        "recall": 1.0,
+        "f1": 0.8966,
+        "fpr": 0.125
+      },
+      "score_auc": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9615
+      },
+      "operating_modes": {
+        "full_v2_0": 74
+      },
+      "calibration_status": {
+        "risk": "calibrated",
+        "detection": "calibrated",
+        "threshold_version": "cal-20261112T035409Z-2962264f"
+      },
+      "score_by_label": {
+        "high_risk": {
+          "count": 6,
+          "mean": 0.7322,
+          "p95": 0.7568
+        },
+        "normal": {
+          "count": 48,
+          "mean": 0.1342,
+          "p95": 0.2237
+        },
+        "suspicious": {
+          "count": 20,
+          "mean": 0.4882,
+          "p95": 0.6699
+        }
+      }
+    },
+    "after_hours_lab": {
+      "rows": 76,
+      "labels": {
+        "normal": 48,
+        "suspicious": 28
+      },
+      "default_risk_level": {
+        "tp": 28,
+        "fp": 8,
+        "tn": 40,
+        "fn": 0,
+        "precision": 0.7778,
+        "recall": 1.0,
+        "f1": 0.875,
+        "fpr": 0.1667
+      },
+      "score_auc": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9643
+      },
+      "operating_modes": {
+        "full_v2_0": 76
+      },
+      "calibration_status": {
+        "risk": "calibrated",
+        "detection": "calibrated",
+        "threshold_version": "cal-20261112T035409Z-2962264f"
+      },
+      "score_by_label": {
+        "normal": {
+          "count": 48,
+          "mean": 0.1452,
+          "p95": 0.2499
+        },
+        "suspicious": {
+          "count": 28,
+          "mean": 0.5897,
+          "p95": 0.6999
+        }
+      }
+    },
+    "low_and_slow": {
+      "rows": 96,
+      "labels": {
+        "normal": 69,
+        "suspicious": 27
+      },
+      "default_risk_level": {
+        "tp": 27,
+        "fp": 9,
+        "tn": 60,
+        "fn": 0,
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571,
+        "fpr": 0.1304
+      },
+      "score_auc": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.963
+      },
+      "operating_modes": {
+        "full_v2_0": 96
+      },
+      "calibration_status": {
+        "risk": "calibrated",
+        "detection": "calibrated",
+        "threshold_version": "cal-20261112T035409Z-2962264f"
+      },
+      "score_by_label": {
+        "normal": {
+          "count": 69,
+          "mean": 0.1264,
+          "p95": 0.2175
+        },
+        "suspicious": {
+          "count": 27,
+          "mean": 0.5227,
+          "p95": 0.6595
+        }
+      }
+    },
+    "mixed_campaign": {
+      "rows": 338,
+      "labels": {
+        "normal": 231,
+        "suspicious": 88,
+        "high_risk": 19
+      },
+      "default_risk_level": {
+        "tp": 107,
+        "fp": 30,
+        "tn": 201,
+        "fn": 0,
+        "precision": 0.781,
+        "recall": 1.0,
+        "f1": 0.877,
+        "fpr": 0.1299
+      },
+      "score_auc": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9907
+      },
+      "operating_modes": {
+        "full_v2_0": 338
+      },
+      "calibration_status": {
+        "risk": "calibrated",
+        "detection": "calibrated",
+        "threshold_version": "cal-20261112T035409Z-2962264f"
+      },
+      "score_by_label": {
+        "high_risk": {
+          "count": 19,
+          "mean": 0.6975,
+          "p95": 0.7728
+        },
+        "normal": {
+          "count": 231,
+          "mean": 0.134,
+          "p95": 0.2281
+        },
+        "suspicious": {
+          "count": 88,
+          "mean": 0.5383,
+          "p95": 0.6761
+        }
+      }
+    }
+  },
+  "false_positive_notes": [
+    "Default operating point uses calibrated High/Critical risk levels.",
+    "Validation-selected threshold is reported separately and was not tuned on holdout.",
+    "Scenario baseline FP rate is the control for synthetic FP reduction checks."
+  ],
+  "notes": [
+    "Scores are calibrated anomaly scores, not probabilities.",
+    "Holdout users are disjoint from all training/calibration users.",
+    "Synthetic scenarios are defensive research data only."
+  ]
+}

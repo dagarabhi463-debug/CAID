@@ -163,9 +163,10 @@ def render_correlation_results(result: Dict) -> None:
     else:
         st.info("No sensitive-operation activity detected.")
 
+    from modules.export import export_csv
     st.download_button(
         "Download Correlation Findings",
-        corr.to_csv(index=False),
+        export_csv(corr),
         "cross_session_correlations.csv",
         "text/csv",
     )

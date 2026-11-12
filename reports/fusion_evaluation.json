@@ -1,0 +1,509 @@
+{
+  "splits": {
+    "unsup_train": 179,
+    "calibration": 73,
+    "sup_train": 227,
+    "validation": 123,
+    "holdout": 133
+  },
+  "validation_scope": "internal_reproducibility",
+  "independent_validation": "not_performed_current_data_only",
+  "timing": {
+    "validation_pipeline_s": 3.48,
+    "holdout_pipeline_s": 3.64
+  },
+  "channels": {
+    "ml": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 31,
+        "fp": 2,
+        "tn": 90,
+        "fn": 0,
+        "precision": 0.9394,
+        "recall": 1.0,
+        "f1": 0.9688,
+        "fpr": 0.0217
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 35,
+        "fp": 2,
+        "tn": 96,
+        "fn": 0,
+        "precision": 0.9459,
+        "recall": 1.0,
+        "f1": 0.9722,
+        "fpr": 0.0204
+      }
+    },
+    "rules": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 5,
+        "fp": 0,
+        "tn": 92,
+        "fn": 26,
+        "precision": 1.0,
+        "recall": 0.1613,
+        "f1": 0.2778,
+        "fpr": 0.0
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 2,
+        "fp": 0,
+        "tn": 98,
+        "fn": 33,
+        "precision": 1.0,
+        "recall": 0.0571,
+        "f1": 0.1081,
+        "fpr": 0.0
+      }
+    },
+    "behavioral": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 28,
+        "fp": 0,
+        "tn": 92,
+        "fn": 3,
+        "precision": 1.0,
+        "recall": 0.9032,
+        "f1": 0.9492,
+        "fpr": 0.0
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 33,
+        "fp": 0,
+        "tn": 98,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.9429,
+        "f1": 0.9706,
+        "fpr": 0.0
+      }
+    },
+    "session": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 0,
+        "fp": 0,
+        "tn": 92,
+        "fn": 31,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 0,
+        "fp": 0,
+        "tn": 98,
+        "fn": 35,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0
+      }
+    },
+    "sequence": {
+      "validation": {
+        "roc_auc": 0.7258,
+        "pr_auc": 0.5815,
+        "tp": 14,
+        "fp": 0,
+        "tn": 92,
+        "fn": 17,
+        "precision": 1.0,
+        "recall": 0.4516,
+        "f1": 0.6222,
+        "fpr": 0.0
+      },
+      "holdout": {
+        "roc_auc": 0.6714,
+        "pr_auc": 0.5101,
+        "tp": 12,
+        "fp": 0,
+        "tn": 98,
+        "fn": 23,
+        "precision": 1.0,
+        "recall": 0.3429,
+        "f1": 0.5106,
+        "fpr": 0.0
+      }
+    }
+  },
+  "combined_v2_0": {
+    "validation": {
+      "roc_auc": 1.0,
+      "pr_auc": 0.9677,
+      "tp": 14,
+      "fp": 0,
+      "tn": 92,
+      "fn": 17,
+      "precision": 1.0,
+      "recall": 0.4516,
+      "f1": 0.6222,
+      "fpr": 0.0,
+      "operating_modes": {
+        "full_v2_0": 123
+      },
+      "missing_channel_rate": 0.0
+    },
+    "holdout": {
+      "roc_auc": 1.0,
+      "pr_auc": 0.9714,
+      "tp": 12,
+      "fp": 0,
+      "tn": 98,
+      "fn": 23,
+      "precision": 1.0,
+      "recall": 0.3429,
+      "f1": 0.5106,
+      "fpr": 0.0,
+      "operating_modes": {
+        "full_v2_0": 133
+      },
+      "missing_channel_rate": 0.0
+    }
+  },
+  "ablation_drop_one": {
+    "ml": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 14,
+        "fp": 0,
+        "tn": 92,
+        "fn": 17,
+        "precision": 1.0,
+        "recall": 0.4516,
+        "f1": 0.6222,
+        "fpr": 0.0,
+        "pipeline_s": 4.28
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 12,
+        "fp": 0,
+        "tn": 98,
+        "fn": 23,
+        "precision": 1.0,
+        "recall": 0.3429,
+        "f1": 0.5106,
+        "fpr": 0.0,
+        "pipeline_s": 3.58
+      }
+    },
+    "rules": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 14,
+        "fp": 0,
+        "tn": 92,
+        "fn": 17,
+        "precision": 1.0,
+        "recall": 0.4516,
+        "f1": 0.6222,
+        "fpr": 0.0,
+        "pipeline_s": 3.6
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 12,
+        "fp": 0,
+        "tn": 98,
+        "fn": 23,
+        "precision": 1.0,
+        "recall": 0.3429,
+        "f1": 0.5106,
+        "fpr": 0.0,
+        "pipeline_s": 3.39
+      }
+    },
+    "behavioral": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 14,
+        "fp": 0,
+        "tn": 92,
+        "fn": 17,
+        "precision": 1.0,
+        "recall": 0.4516,
+        "f1": 0.6222,
+        "fpr": 0.0,
+        "pipeline_s": 3.16
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 12,
+        "fp": 0,
+        "tn": 98,
+        "fn": 23,
+        "precision": 1.0,
+        "recall": 0.3429,
+        "f1": 0.5106,
+        "fpr": 0.0,
+        "pipeline_s": 3.45
+      }
+    },
+    "session": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 14,
+        "fp": 0,
+        "tn": 92,
+        "fn": 17,
+        "precision": 1.0,
+        "recall": 0.4516,
+        "f1": 0.6222,
+        "fpr": 0.0,
+        "pipeline_s": 3.84
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 13,
+        "fp": 0,
+        "tn": 98,
+        "fn": 22,
+        "precision": 1.0,
+        "recall": 0.3714,
+        "f1": 0.5417,
+        "fpr": 0.0,
+        "pipeline_s": 3.98
+      }
+    },
+    "sequence": {
+      "validation": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677,
+        "tp": 16,
+        "fp": 0,
+        "tn": 92,
+        "fn": 15,
+        "precision": 1.0,
+        "recall": 0.5161,
+        "f1": 0.6809,
+        "fpr": 0.0,
+        "pipeline_s": 4.13
+      },
+      "holdout": {
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714,
+        "tp": 14,
+        "fp": 0,
+        "tn": 98,
+        "fn": 21,
+        "precision": 1.0,
+        "recall": 0.4,
+        "f1": 0.5714,
+        "fpr": 0.0,
+        "pipeline_s": 3.58
+      }
+    }
+  },
+  "combined_legacy": {
+    "validation": {
+      "roc_auc": 1.0,
+      "pr_auc": 0.9677,
+      "tp": 23,
+      "fp": 0,
+      "tn": 92,
+      "fn": 8,
+      "precision": 1.0,
+      "recall": 0.7419,
+      "f1": 0.8519,
+      "fpr": 0.0,
+      "operating_modes": {
+        "full_ml_rules_behavioral": 123
+      }
+    },
+    "holdout": {
+      "roc_auc": 1.0,
+      "pr_auc": 0.9714,
+      "tp": 25,
+      "fp": 0,
+      "tn": 98,
+      "fn": 10,
+      "precision": 1.0,
+      "recall": 0.7143,
+      "f1": 0.8333,
+      "fpr": 0.0,
+      "operating_modes": {
+        "full_ml_rules_behavioral": 133
+      }
+    }
+  },
+  "threshold_sensitivity_validation_only": [
+    {
+      "threshold": 0.3,
+      "tp": 29,
+      "fp": 0,
+      "tn": 92,
+      "fn": 2,
+      "precision": 1.0,
+      "recall": 0.9355,
+      "f1": 0.9667,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.35,
+      "tp": 24,
+      "fp": 0,
+      "tn": 92,
+      "fn": 7,
+      "precision": 1.0,
+      "recall": 0.7742,
+      "f1": 0.8727,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.4,
+      "tp": 19,
+      "fp": 0,
+      "tn": 92,
+      "fn": 12,
+      "precision": 1.0,
+      "recall": 0.6129,
+      "f1": 0.76,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.45,
+      "tp": 17,
+      "fp": 0,
+      "tn": 92,
+      "fn": 14,
+      "precision": 1.0,
+      "recall": 0.5484,
+      "f1": 0.7083,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.5,
+      "tp": 14,
+      "fp": 0,
+      "tn": 92,
+      "fn": 17,
+      "precision": 1.0,
+      "recall": 0.4516,
+      "f1": 0.6222,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.55,
+      "tp": 14,
+      "fp": 0,
+      "tn": 92,
+      "fn": 17,
+      "precision": 1.0,
+      "recall": 0.4516,
+      "f1": 0.6222,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.6,
+      "tp": 14,
+      "fp": 0,
+      "tn": 92,
+      "fn": 17,
+      "precision": 1.0,
+      "recall": 0.4516,
+      "f1": 0.6222,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.65,
+      "tp": 10,
+      "fp": 0,
+      "tn": 92,
+      "fn": 21,
+      "precision": 1.0,
+      "recall": 0.3226,
+      "f1": 0.4878,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.7,
+      "tp": 5,
+      "fp": 0,
+      "tn": 92,
+      "fn": 26,
+      "precision": 1.0,
+      "recall": 0.1613,
+      "f1": 0.2778,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.75,
+      "tp": 0,
+      "fp": 0,
+      "tn": 92,
+      "fn": 31,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.8,
+      "tp": 0,
+      "fp": 0,
+      "tn": 92,
+      "fn": 31,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.85,
+      "tp": 0,
+      "fp": 0,
+      "tn": 92,
+      "fn": 31,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.9,
+      "tp": 0,
+      "fp": 0,
+      "tn": 92,
+      "fn": 31,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0
+    }
+  ],
+  "notes": [
+    "All baselines fit on unsup_train normal rows only.",
+    "Holdout evaluated once; never used for tuning or selection.",
+    "Threshold sensitivity computed on validation split only.",
+    "Channel scores are anomaly/deviation scores, not probabilities.",
+    "Ablation removes a channel from configured weights; remaining weights renormalize per DetectionEngine policy.",
+    "Validation scope is internal reproducibility on the current labeled CSVs, not independent validation.",
+    "Independent validation option: recover data/independent_v2 from git commit bfdca25 (see docs/research/ml_benchmark_methodology.md)."
+  ]
+}

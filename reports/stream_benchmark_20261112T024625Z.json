@@ -1,0 +1,55 @@
+{
+  "benchmark": "milestone_2_5_streaming",
+  "mode": "sustained",
+  "target_rate_eps": 100.0,
+  "duration_s": 15.0,
+  "events_produced": 1500,
+  "events_processed": 1471,
+  "events_lost": 29,
+  "dlq_depth": 29,
+  "queue_impl": "asyncio",
+  "batch_size": 50,
+  "warmup_events": 150,
+  "wall_seconds": 18.274,
+  "effective_eps": 80.5,
+  "latency": {
+    "count": 1471,
+    "p50": 0.794563,
+    "p95": 1.656683,
+    "p99": 1.8944430000000003,
+    "min": 0.048307,
+    "max": 1.903188,
+    "mean": 0.9109812549286199
+  },
+  "counters": {
+    "caid_events_received_total": 1500.0
+  },
+  "gauges": {
+    "caid_queue_depth": 0.0,
+    "caid_dlq_depth": 29.0
+  },
+  "artifact_statuses": {
+    "detector": "loaded",
+    "feature_baseline": null,
+    "behavioral_baseline": "loaded",
+    "session_baseline": "loaded",
+    "sequence_model": "loaded"
+  },
+  "calibration_statuses": {
+    "risk": "calibrated",
+    "detection": "calibrated",
+    "threshold_version": "cal-20261112T020320Z-2962264f"
+  },
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.6",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "machine": "AMD64"
+  },
+  "redis_url": "redis://127.0.0.1:6379/0",
+  "notes": [
+    "Synthetic events only; labels stripped.",
+    "Scores are calibrated anomaly scores, not probabilities.",
+    "Redis impl requires Redis >= 5.0 (local 3.0.504 unsupported)."
+  ]
+}

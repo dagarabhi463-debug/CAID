@@ -59,6 +59,17 @@ page = st.navigation(
                     icon=":material/query_stats:",
                     help="Isolation Forest results, detection rules, "
                          "behavioral deviations, and per-event evidence."),
+            st.Page("app_pages/streaming_health.py",
+                    title="Streaming health",
+                    icon=":material/monitor_heart:",
+                    help="Streaming throughput, latency, DLQ, checkpoint, "
+                         "and queue observability."),
+            st.Page("app_pages/detection_quality.py",
+                    title="Detection Quality",
+                    icon=":material/science:",
+                    help="Offline evaluation reports: unseen-user metrics, "
+                         "per-channel fusion, model benchmark, calibration "
+                         "manifest, and observational drift."),
         ],
         "Investigate": [
             st.Page("app_pages/session_intelligence.py",
@@ -94,6 +105,11 @@ page = st.navigation(
                     icon=":material/settings:",
                     help="System status, Ollama model configuration, and "
                          "MITRE dataset management."),
+            st.Page("app_pages/reports.py", title="Reports & Exports",
+                    icon=":material/download:",
+                    help="Inventory of evaluation reports, calibration "
+                         "artifacts, benchmark files, and where every "
+                         "export lives."),
         ],
     },
     position="sidebar",

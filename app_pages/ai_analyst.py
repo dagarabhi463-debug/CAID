@@ -7,7 +7,9 @@ from core.ai_analyst import (
     ask,
     explain_event,
     explain_finding,
+    generate_investigation_summary,
     hunt,
+    investigate_attack_chain,
     summarize_incident,
 )
 from core.ollama_client import OllamaClient
@@ -75,9 +77,9 @@ if df is None or len(df) == 0:
     st.info("No analyzed events available.")
     st.stop()
 
-tab_event, tab_finding, tab_incident, tab_hunt, tab_qa = st.tabs([
+tab_event, tab_finding, tab_incident, tab_chain, tab_hunt, tab_qa = st.tabs([
     "Event explanation", "Finding explanation", "Incident summary",
-    "Threat hunting", "Ask a question",
+    "Attack chain", "Threat hunting", "Ask a question",
 ])
 
 # ---- Event explanation ----------------------------------------------------
@@ -144,6 +146,44 @@ with tab_incident:
             _show_response(resp)
             st.caption("AI summaries are advisory only — incident severity "
                        "and status are unchanged.")
+
+# ---- Attack chain / automated investigation -------------------------------
+with tab_chain:
+    st.markdown("Reconstruct a retrospective attack chain and generate an "
+                "automated investigation summary from grounded incident "
+                "evidence only.")
+    if not incidents:
+        st.info("No incidents recorded for the current store.")
+    else:
+        chain_labels = {i['incident_id']:
+                        f"{i['incident_id']} — {i.get('title', '')} "
+                        f"[{i.get('severity')}/{i.get('status')}]"
+                        for i in incidents}
+        cchoice = st.selectbox("Incident", options=list(chain_labels.keys()),
+                               format_func=lambda k: chain_labels.get(k, k),
+                               key='ai_chain_pick')
+        cinc = get_manager().store.get(cchoice)
+        if cinc:
+            c1, c2 = st.columns(2)
+            if c1.button("Investigate attack chain", key='ai_chain_btn',
+                         type='primary'):
+                with st.spinner("Reconstructing attack chain…"):
+                    resp = investigate_attack_chain(cinc, scored_df=df,
+                                                    client=client,
+                                                    model=_model())
+                _show_response(resp)
+                st.caption(f"Matched event evidence: "
+                           f"{resp.get('matched_event_count', 0)}; "
+                           f"ATT&CK mappings: {resp.get('mitre_mapping_count', 0)}")
+            if c2.button("Generate investigation summary",
+                         key='ai_inv_summary_btn'):
+                with st.spinner("Generating investigation summary…"):
+                    resp = generate_investigation_summary(cinc, scored_df=df,
+                                                          client=client,
+                                                          model=_model())
+                _show_response(resp)
+                st.caption("Automated summary is advisory only — incident "
+                           "severity and status are unchanged.")
 
 # ---- Threat hunting -------------------------------------------------------
 with tab_hunt:

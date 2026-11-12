@@ -2,3 +2,17 @@
 __pycache__/
 .pytest_cache/
 .streamlit/secrets.toml
+
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+
+# Editor / OS noise
+.vscode/
+nul
+
+# Runtime-generated streaming artifacts (benchmark evidence reports stay tracked)
+data/stream_dlq/
+data/stream_results/
+data/stream_checkpoint/

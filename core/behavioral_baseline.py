@@ -95,6 +95,9 @@ class BehavioralBaselineManager:
         }
         self._is_fitted = False
         self._fit_event_count = 0
+        # Ephemeral runtime status set by ensure_fitted_baseline:
+        # 'loaded' | 'refit_fallback_missing' | 'refit_fallback_corrupt'
+        self.artifact_status: Optional[str] = None
 
     @staticmethod
     def _safe_std(value) -> float:
@@ -595,21 +598,42 @@ def get_baseline_path() -> str:
 def ensure_fitted_baseline(path: Optional[str] = None) -> BehavioralBaselineManager:
     """
     Load persisted behavioral baselines, training on the normal-activity
-    baseline dataset if no artifact exists.
+    baseline dataset if no usable artifact exists.
+
+    Lifecycle policy (AUD-002, see core/artifact_lifecycle.py):
+    - loads cleanly            -> artifact_status = 'loaded'
+    - missing                  -> fit + persist, 'refit_fallback_missing'
+    - corrupt/incompatible     -> quarantine corrupt file, fit + persist
+                                  fresh, 'refit_fallback_corrupt'
 
     Returns:
-        Fitted BehavioralBaselineManager.
+        Fitted BehavioralBaselineManager with ``artifact_status`` set.
     """
+    from core.artifact_lifecycle import (
+        STATUS_LOADED, STATUS_REFIT_MISSING, STATUS_REFIT_CORRUPT,
+        quarantine_corrupt)
+
     path = path or get_baseline_path()
     mgr = BehavioralBaselineManager()
     if os.path.exists(path):
         try:
             mgr.load(path)
+            mgr.artifact_status = STATUS_LOADED
             return mgr
         except Exception as e:
-            print(f"Failed to load behavioral baselines: {e}. Retraining...")
+            quarantine = quarantine_corrupt(path)
+            print(f"Failed to load behavioral baselines: {e}. "
+                  f"Quarantined corrupt artifact to {quarantine}; "
+                  "retraining on normal baseline data...")
+            from core.log_processor import load_sample_dataset
+            df_normal = load_sample_dataset('normal')
+            mgr.fit(df_normal)
+            mgr.save(path)
+            mgr.artifact_status = STATUS_REFIT_CORRUPT
+            return mgr
     from core.log_processor import load_sample_dataset
     df_normal = load_sample_dataset('normal')
     mgr.fit(df_normal)
     mgr.save(path)
+    mgr.artifact_status = STATUS_REFIT_MISSING
     return mgr

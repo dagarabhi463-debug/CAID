@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from core.ai_context import (
+    attack_chain_context,
     event_context,
     finding_context,
     incident_context,
@@ -12,7 +13,13 @@ from core.ai_context import (
     wrap_untrusted,
     THREAT_HUNT_QUERIES,
 )
-from core.ai_analyst import explain_event, hunt, ask
+from core.ai_analyst import (
+    ask,
+    explain_event,
+    generate_investigation_summary,
+    hunt,
+    investigate_attack_chain,
+)
 from core.ollama_client import OllamaUnavailable
 
 
@@ -190,3 +197,49 @@ def test_all_hunt_queries_run_on_df(scored_df):
     for spec in THREAT_HUNT_QUERIES:
         out = spec['fn'](scored_df)
         assert isinstance(out, pd.DataFrame)
+
+
+def _incident():
+    return {'incident_id': 'inc_ai', 'title': 'AI test incident',
+            'severity': 'High', 'status': 'Open',
+            'entity_users': ['u1'], 'entity_sessions': ['s1'],
+            'entity_ips': ['10.0.0.1'],
+            'findings': [{'correlation_id': 'c1',
+                          'correlation_type': 'repeated_sensitive_operations',
+                          'correlation_score': 0.8, 'shared_ip_only': False,
+                          'evidence': [{'signal': 'bulk_download'}]}],
+            'notes': []}
+
+
+def test_attack_chain_context_uses_real_evidence(scored_df):
+    ctx = attack_chain_context(
+        _incident(), scored_df=scored_df,
+        mitre_mappings=[{'technique_id': 'T1213', 'technique_name': 'Data from '
+                         'Information Repositories', 'tactic': 'collection',
+                         'confidence': 'potential'}])
+    assert ctx['matched_event_count'] == 2
+    assert any('ATT&CK T1213' in e for e in ctx['evidence'])
+    assert any('retrospective' in l for l in ctx['limitations'])
+
+
+def test_attack_chain_and_summary_fallback(scored_df):
+    class DeadClient:
+        model = 'none'
+
+        def resolve_model(self):
+            return None
+
+        def generate(self, *a, **k):
+            raise OllamaUnavailable('down')
+
+    chain = investigate_attack_chain(_incident(), scored_df=scored_df,
+                                     mitre_mappings=[], client=DeadClient())
+    assert 'deterministic evidence summary' in chain['text'].lower()
+    assert chain['matched_event_count'] == 2
+    assert chain['mitre_mapping_count'] == 0
+
+    summary = generate_investigation_summary(_incident(), scored_df=scored_df,
+                                             mitre_mappings=[],
+                                             client=DeadClient())
+    assert 'deterministic evidence summary' in summary['text'].lower()
+    assert summary['matched_event_count'] == 2

@@ -1,22 +1,26 @@
 # Web Framework
-streamlit
+streamlit>=1.67,<2
 
 # Data Processing
-pandas
-numpy
+pandas>=3.1,<4
+numpy>=2.5,<3
 
 # Machine Learning
-scikit-learn
+scikit-learn>=1.9,<2
+joblib>=1.4,<2
 
 # Visualization
-plotly
-matplotlib
+plotly>=5.0,<8
+matplotlib>=3.9,<4
 
 # Testing
-pytest
+pytest>=8.0,<10
 
 # PDF Reports
-reportlab
+reportlab>=5.1,<6
+
+# Streaming ingestion (Milestone 2.5) — Redis Streams queue adapter
+redis>=5,<7
 
 # AI/LLM Integration (Optional)
 # Ollama is used via its local HTTP API (stdlib urllib) — install the

@@ -202,13 +202,13 @@ def display_statistics(df: pd.DataFrame):
     
     with col3:
         if stats['time_range']:
-            st.metric("Time Range Start", stats['time_range']['start'][:10])
+            st.metric("Time Range Start", str(stats['time_range']['start'])[:10])
         else:
             st.metric("Time Range Start", "N/A")
     
     with col4:
         if stats['time_range']:
-            st.metric("Time Range End", stats['time_range']['end'][:10])
+            st.metric("Time Range End", str(stats['time_range']['end'])[:10])
         else:
             st.metric("Time Range End", "N/A")
     
@@ -682,16 +682,12 @@ def display_timeline_visualization(df: pd.DataFrame):
     # Show count
     st.write(f"Showing up to 100 most recent events")
     
-    # Download timeline
-    csv_data, filename, _ = get_download_button_csv(
-        export_timeline_events(timeline),
-        "timeline_events.csv",
-        "Download Timeline"
-    )
+    # Download timeline (export_timeline_events already returns CSV bytes)
+    csv_data = export_timeline_events(timeline)
     st.download_button(
         label="📥 Download Timeline",
         data=csv_data,
-        file_name=filename,
+        file_name="timeline_events.csv",
         mime="text/csv",
         key="download_timeline"
     )
@@ -877,39 +873,25 @@ def analyze_uploaded_data(df: pd.DataFrame) -> pd.DataFrame:
         )
     st.session_state.upload_clean_summary = clean_summary
 
-    # Ensure we have an anomaly detector
-    anomaly_detector = ensure_model_exists()
-    
-    # Apply anomaly detection on RAW data (predict engineers features
-    # internally using the persisted training baselines)
-    try:
-        df_analyzed = anomaly_detector.predict(df)
-    except RuntimeError:
-        # If model not fitted, train on baseline then predict
-        from core.log_processor import load_sample_dataset
-        df_normal = load_sample_dataset('normal')
-        anomaly_detector.fit(df_normal)
-        df_analyzed = anomaly_detector.predict(df)
-    
-    # Apply risk engine with persisted calibrated thresholds (Milestone 1.9)
-    risk_engine = RiskEngine()
-    apply_risk_calibration(risk_engine, detector=anomaly_detector)
-    st.session_state.risk_calibration_status = risk_engine.calibration_status
-    st.session_state.risk_threshold_version = risk_engine.threshold_version
-    df_analyzed = risk_engine.process_events(df_analyzed)
-    
-    # Apply rule-based detection (parity with Milestone 3 pipeline)
-    from core.detection_rules import DetectionRulesEngine
-    df_analyzed = DetectionRulesEngine().process_events(df_analyzed)
-    
-    # Apply behavioral analysis using persisted training baselines
-    # (never fitted on the uploaded/inference data)
-    from core.behavioural_analyzer import ensure_fitted_analyzer
-    df_analyzed = ensure_fitted_analyzer().analyze_user_behavior(df_analyzed)
-    
-    # Apply detection engine for combined scoring
-    from core.detection_engine import DetectionEngine
-    detection_engine = DetectionEngine()
-    df_analyzed = detection_engine.process_dataframe(df_analyzed)
-    
+    # AUD-003: uploaded data now runs through the SAME v2_0 detection
+    # pipeline as scenario analysis — ML + rules + behavioral + session +
+    # sequence channels with v2 calibration lookup. Output is a superset
+    # of the legacy profile (adds session_*/sequence_*/operating_mode/
+    # missing_channels columns); risk_level/combined_score semantics now
+    # match the scenario pipeline exactly.
+    from modules.session_intelligence import analyze_session_intelligence
+    df_analyzed = analyze_session_intelligence(df)
+
+    # Surface calibration/artifact status for the UI (Milestones 1.9/2.4).
+    if 'risk_calibration_status' in df_analyzed.columns:
+        st.session_state.risk_calibration_status = \
+            df_analyzed['risk_calibration_status'].mode().iloc[0]
+    if 'detection_calibration_status' in df_analyzed.columns:
+        st.session_state.detection_calibration_status = \
+            df_analyzed['detection_calibration_status'].mode().iloc[0]
+    if 'threshold_version' in df_analyzed.columns and \
+            df_analyzed['threshold_version'].notna().any():
+        st.session_state.risk_threshold_version = \
+            df_analyzed['threshold_version'].dropna().iloc[0]
+
     return df_analyzed

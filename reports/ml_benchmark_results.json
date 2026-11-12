@@ -1,0 +1,317 @@
+{
+  "benchmark": "milestone_2_4_ml_detection",
+  "seed": 42,
+  "validation_scope": "internal_reproducibility",
+  "independent_validation": "not_performed_current_data_only",
+  "environment": {
+    "python": "3.14.6",
+    "pandas": "3.1.1",
+    "numpy": "2.5.4",
+    "sklearn": "1.9.1"
+  },
+  "data": {
+    "files": [
+      "data\\raw\\security_logs.csv",
+      "data\\processed\\evaluation_data.csv"
+    ],
+    "total_rows": 850,
+    "splits": {
+      "unsup_train": {
+        "rows": 179,
+        "labels": {
+          "normal": 179
+        },
+        "users": 174
+      },
+      "calibration": {
+        "rows": 73,
+        "labels": {
+          "normal": 73
+        },
+        "users": 70
+      },
+      "sup_train": {
+        "rows": 227,
+        "labels": {
+          "normal": 158,
+          "suspicious": 41,
+          "high_risk": 28
+        },
+        "users": 219
+      },
+      "validation": {
+        "rows": 123,
+        "labels": {
+          "normal": 92,
+          "suspicious": 16,
+          "high_risk": 15
+        },
+        "users": 120
+      },
+      "holdout": {
+        "rows": 133,
+        "labels": {
+          "normal": 98,
+          "suspicious": 21,
+          "high_risk": 14
+        },
+        "users": 125
+      }
+    },
+    "entity_disjoint": true
+  },
+  "peak_traced_memory_mb": 2.51,
+  "feature_engineering_mem_mb": 0.73,
+  "results": {
+    "isolation_forest": {
+      "validation:binary": {
+        "tp": 31,
+        "fp": 3,
+        "tn": 89,
+        "fn": 0,
+        "precision": 0.9118,
+        "recall": 1.0,
+        "f1": 0.9538,
+        "fpr": 0.0326,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677
+      },
+      "timing": {
+        "validation_predict_s": 0.396,
+        "holdout_predict_s": 0.4729
+      },
+      "validation:high_risk": {
+        "tp": 15,
+        "fp": 19,
+        "tn": 89,
+        "fn": 0,
+        "precision": 0.4412,
+        "recall": 1.0,
+        "f1": 0.6122,
+        "fpr": 0.1759,
+        "roc_auc": 0.9429,
+        "pr_auc": 0.5473
+      },
+      "holdout:binary": {
+        "tp": 35,
+        "fp": 2,
+        "tn": 96,
+        "fn": 0,
+        "precision": 0.9459,
+        "recall": 1.0,
+        "f1": 0.9722,
+        "fpr": 0.0204,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714
+      },
+      "holdout:high_risk": {
+        "tp": 14,
+        "fp": 23,
+        "tn": 96,
+        "fn": 0,
+        "precision": 0.3784,
+        "recall": 1.0,
+        "f1": 0.549,
+        "fpr": 0.1933,
+        "roc_auc": 0.9457,
+        "pr_auc": 0.5049
+      },
+      "train_time_s": 1.9,
+      "n_features": 30,
+      "feature_columns": [
+        "courses_accessed",
+        "accounts_accessed",
+        "api_requests",
+        "data_mb",
+        "token_age_minutes",
+        "after_hours",
+        "hour",
+        "day_of_week",
+        "is_weekend",
+        "is_after_hours",
+        "user_total_api",
+        "user_mean_api",
+        "user_max_api",
+        "user_total_data",
+        "user_mean_data",
+        "user_max_data",
+        "user_total_courses",
+        "user_mean_courses",
+        "user_max_courses",
+        "user_total_accounts",
+        "user_mean_accounts",
+        "user_max_accounts",
+        "user_api_z",
+        "user_data_z",
+        "user_courses_z",
+        "user_accounts_z",
+        "user_event_count",
+        "ip_event_count",
+        "event_type_frequency",
+        "is_sensitive_event"
+      ]
+    },
+    "local_outlier": {
+      "validation:binary": {
+        "tp": 31,
+        "fp": 91,
+        "tn": 1,
+        "fn": 0,
+        "precision": 0.2541,
+        "recall": 1.0,
+        "f1": 0.4052,
+        "fpr": 0.9891,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677
+      },
+      "validation:high_risk": {
+        "tp": 15,
+        "fp": 107,
+        "tn": 1,
+        "fn": 0,
+        "precision": 0.123,
+        "recall": 1.0,
+        "f1": 0.219,
+        "fpr": 0.9907,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9333
+      },
+      "holdout:binary": {
+        "tp": 35,
+        "fp": 98,
+        "tn": 0,
+        "fn": 0,
+        "precision": 0.2632,
+        "recall": 1.0,
+        "f1": 0.4167,
+        "fpr": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714
+      },
+      "holdout:high_risk": {
+        "tp": 14,
+        "fp": 119,
+        "tn": 0,
+        "fn": 0,
+        "precision": 0.1053,
+        "recall": 1.0,
+        "f1": 0.1905,
+        "fpr": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9286
+      },
+      "train_time_s": 0.103
+    },
+    "random_forest": {
+      "validation:binary": {
+        "tp": 31,
+        "fp": 0,
+        "tn": 92,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677
+      },
+      "validation:high_risk": {
+        "tp": 15,
+        "fp": 16,
+        "tn": 92,
+        "fn": 0,
+        "precision": 0.4839,
+        "recall": 1.0,
+        "f1": 0.6522,
+        "fpr": 0.1481,
+        "roc_auc": 0.9444,
+        "pr_auc": 0.5576
+      },
+      "holdout:binary": {
+        "tp": 35,
+        "fp": 0,
+        "tn": 98,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714
+      },
+      "holdout:high_risk": {
+        "tp": 14,
+        "fp": 21,
+        "tn": 98,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714,
+        "fpr": 0.1765,
+        "roc_auc": 0.9412,
+        "pr_auc": 0.4733
+      },
+      "train_time_s": 2.803
+    },
+    "gradient_boost": {
+      "validation:binary": {
+        "tp": 31,
+        "fp": 0,
+        "tn": 92,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9677
+      },
+      "validation:high_risk": {
+        "tp": 15,
+        "fp": 16,
+        "tn": 92,
+        "fn": 0,
+        "precision": 0.4839,
+        "recall": 1.0,
+        "f1": 0.6522,
+        "fpr": 0.1481,
+        "roc_auc": 0.9259,
+        "pr_auc": 0.5195
+      },
+      "holdout:binary": {
+        "tp": 35,
+        "fp": 0,
+        "tn": 98,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9714
+      },
+      "holdout:high_risk": {
+        "tp": 14,
+        "fp": 21,
+        "tn": 98,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714,
+        "fpr": 0.1765,
+        "roc_auc": 0.9118,
+        "pr_auc": 0.3494
+      },
+      "train_time_s": 0.367
+    }
+  },
+  "notes": [
+    "Scores are anomaly scores, not probabilities.",
+    "Holdout evaluated once; never used for training, feature selection, or threshold tuning.",
+    "Supervised models trained on labeled sup_train users only (disjoint from all eval users).",
+    "Default operating thresholds only \u2014 no threshold tuning on validation or holdout.",
+    "Small labeled corpus (~850 rows): metrics are indicative, not statistically powerful.",
+    "Validation scope is internal reproducibility on the current labeled CSVs, not independent validation.",
+    "Independent validation option: recover data/independent_v2 from git commit bfdca25 (see docs/research/ml_benchmark_methodology.md)."
+  ]
+}

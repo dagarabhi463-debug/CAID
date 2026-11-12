@@ -30,6 +30,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Callable, Dict, List, Optional
@@ -179,7 +180,20 @@ class IncidentStore:
         try:
             with os.fdopen(fd, 'w', encoding='utf-8') as fh:
                 json.dump(payload, fh, indent=2, default=str)
-            os.replace(tmp, self.path)
+            # os.replace can transiently fail on Windows (WinError 5/32)
+            # when the destination is held by sync clients (e.g. OneDrive)
+            # or AV scanners — retry briefly before giving up.
+            last_exc = None
+            for attempt in range(5):
+                try:
+                    os.replace(tmp, self.path)
+                    break
+                except OSError as exc:
+                    last_exc = exc
+                    if attempt < 4:
+                        time.sleep(0.1 * (attempt + 1))
+            else:
+                raise last_exc
         except Exception:
             try:
                 os.unlink(tmp)

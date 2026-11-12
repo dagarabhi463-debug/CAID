@@ -363,6 +363,46 @@ class TestDuplicateDetection:
         assert len(issues) > 0
         assert issues[0]['total_duplicate_records'] > 0
 
+    def test_unhashable_cell_values_do_not_crash(self):
+        """Array-like cell values must not raise ambiguous truth value errors."""
+        df = pd.DataFrame({
+            'timestamp': ['2024-01-01 10:00:00', '2024-01-01 10:00:00', '2024-01-01 11:00:00'],
+            'user_id': ['user1', 'user1', 'user2'],
+            'role': ['student', 'student', 'instructor'],
+            'source_ip': ['192.0.2.1', '192.0.2.1', '192.0.2.2'],
+            'event_type': ['login', 'login', 'course_view'],
+            'courses_accessed': [np.array([1, 2]), np.array([1, 2]), [3]],
+            'accounts_accessed': [{'a': 1}, {'a': 1}, {'b': 2}],
+            'api_requests': [50, 50, 60],
+            'data_mb': [1.0, 1.0, 1.5],
+            'token_age_minutes': [30, 30, 45],
+            'after_hours': [0, 0, 0]
+        })
+
+        issues = validate_duplicate_records(df)
+        assert len(issues) > 0
+        assert issues[0]['total_duplicate_records'] == 2
+
+    def test_hashable_non_scalar_cell_values_do_not_crash(self):
+        """Tuples are hashable but pd.isna() returns an array for them."""
+        df = pd.DataFrame({
+            'timestamp': ['2024-01-01 10:00:00', '2024-01-01 10:00:00', '2024-01-01 11:00:00'],
+            'user_id': ['user1', 'user1', 'user2'],
+            'role': ['student', 'student', 'instructor'],
+            'source_ip': ['192.0.2.1', '192.0.2.1', '192.0.2.2'],
+            'event_type': ['login', 'login', 'course_view'],
+            'courses_accessed': [(1, 2), (1, 2), (3,)],
+            'accounts_accessed': [frozenset({1}), frozenset({1}), frozenset({2})],
+            'api_requests': [50, 50, 60],
+            'data_mb': [1.0, 1.0, 1.5],
+            'token_age_minutes': [30, 30, 45],
+            'after_hours': [0, 0, 0]
+        })
+
+        issues = validate_duplicate_records(df)
+        assert len(issues) > 0
+        assert issues[0]['total_duplicate_records'] == 2
+
 
 class TestValidationSummary:
     """Test validation summary generation."""

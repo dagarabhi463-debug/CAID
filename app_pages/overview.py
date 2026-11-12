@@ -20,6 +20,11 @@ if df is None or len(df) == 0:
     st.info("No analyzed events available.")
     st.stop()
 
+st.subheader("Overview")
+st.caption("Platform KPIs and charts for the analyzed scenario. "
+           "All metrics are computed from real pipeline output — "
+           "scores are calibrated anomaly scores, not probabilities.")
+
 incidents = get_manager().list_incidents()
 open_inc = [i for i in incidents if i.get('status') == 'Open']
 crit_inc = [i for i in incidents if i.get('severity') == 'Critical']
@@ -60,6 +65,14 @@ kpis2 = [
 ]
 for col, (label, val) in zip(cols, kpis2):
     col.metric(label, val)
+
+# ---- Data freshness ---------------------------------------------------------
+if 'timestamp' in df.columns:
+    _ts = pd.to_datetime(df['timestamp'], errors='coerce').dropna()
+    if len(_ts):
+        st.caption(
+            f"Data window: {_ts.min()} → {_ts.max()} "
+            f"({result.get('scenario_label', result.get('scenario_key', ''))})")
 
 # ---- System status strip --------------------------------------------------
 with st.expander("System status", expanded=False):
@@ -131,6 +144,38 @@ with c2:
                                labels={score_col: score_col})
             fig.update_layout(height=340)
             st.plotly_chart(fig, width='stretch')
+
+# ---- Channel contribution ---------------------------------------------------
+_CHANNEL_COLS = [
+    ('ML anomaly score', 'anomaly_score_normalized', 'anomaly_score',
+     'ml_anomaly_score'),
+    ('Rules score', 'rule_score', 'rule_detection_score'),
+    ('Behavioral deviation', 'behavioral_deviation_score',
+     'behavioral_deviation'),
+    ('Session deviation', 'session_deviation', 'session_deviation_score'),
+    ('Sequence deviation', 'sequence_deviation', 'sequence_deviation_score'),
+]
+_chan_means = {}
+for label, *cands in _CHANNEL_COLS:
+    col = next((c for c in cands if c in df.columns), None)
+    if col is None:
+        continue
+    vals = pd.to_numeric(df[col], errors='coerce').dropna()
+    if len(vals):
+        _chan_means[label] = float(vals.mean())
+if _chan_means:
+    st.markdown("### Detection channel contribution")
+    cap = ("Mean raw channel output across analyzed events "
+           "(channel scores have different scales; not probabilities).")
+    if 'missing_channels' in df.columns:
+        cap += (f" Missing-channel rate: "
+                f"{float(df['missing_channels'].apply(len).gt(0).mean()):.1%}.")
+    st.caption(cap)
+    fig = px.bar(x=list(_chan_means.values()),
+                 y=list(_chan_means.keys()), orientation='h',
+                 title='Mean channel score', height=280,
+                 labels={'x': 'mean score', 'y': 'channel'})
+    st.plotly_chart(fig, width='stretch')
 
 # ---- Top entities ----------------------------------------------------------
 c1, c2 = st.columns(2)
