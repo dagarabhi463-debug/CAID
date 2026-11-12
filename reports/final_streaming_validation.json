@@ -1,0 +1,177 @@
+{
+  "phase": "4.1",
+  "title": "Streaming reliability validation",
+  "validated_at_utc": "2026-11-12",
+  "git_commit": "f2a3997",
+  "branch": "master",
+  "tag": "v1.0-rc1",
+  "verification": {
+    "pytest_full_suite": {
+      "command": ".venv/Scripts/python.exe -m pytest tests -q",
+      "result": "543 passed, 0 skipped, 4 warnings",
+      "matches_reported_baseline": true
+    },
+    "streaming_unit_tests": {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_streaming_queue.py tests/test_streaming_ordering.py tests/test_streaming_duplicates.py tests/test_streaming_schema.py tests/test_streaming_health.py -q",
+      "result": "35 passed"
+    },
+    "streaming_pipeline_parity": {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_streaming_pipeline.py tests/test_score_consistency.py -q",
+      "result": "28 passed",
+      "note": "includes TestParity: all 650 sample events, batch vs stream score-contract columns match at atol 1e-9"
+    },
+    "redis_7_4_8": {
+      "redis_url": "redis://127.0.0.1:6380/0",
+      "server_version": "7.4.8",
+      "command": "REDIS_URL=redis://127.0.0.1:6380/0 .venv/Scripts/python.exe -m pytest tests/test_redis_streams.py -q",
+      "result": "8 passed"
+    },
+    "redis_5_0_14_1_fallback": {
+      "redis_url": "redis://127.0.0.1:6379/0",
+      "server_version": "5.0.14.1",
+      "command": "REDIS_URL=redis://127.0.0.1:6379/0 .venv/Scripts/python.exe -m pytest tests/test_redis_streams.py -q",
+      "result": "8 passed",
+      "note": "exercises XPENDING/XCLAIM fallback path (XAUTOCLAIM unavailable on 5.x)"
+    },
+    "fresh_sustained_benchmark": {
+      "command": ".venv/Scripts/python.exe scripts/stream_benchmark.py --mode sustained --rate 100 --duration 30 --batch-size 100 --max-hold-s 0.25",
+      "report": "reports/stream_benchmark_20261112T052045Z.json",
+      "events_produced": 3000,
+      "events_processed": 3000,
+      "events_lost": 0,
+      "events_dead_lettered": 0,
+      "events_rejected": 0,
+      "events_duplicate": 0,
+      "effective_eps": 105.6,
+      "latency_p50_s": 0.033,
+      "latency_p95_s": 0.639,
+      "latency_p99_s": 0.717
+    }
+  },
+  "prior_evidence_reviewed": {
+    "implementation_report": "docs/audit/milestone_2_5_implementation_report.md",
+    "reliability_report": "docs/audit/milestone_2_5_1_reliability_report.md",
+    "benchmark_reports_dir": "reports/stream_benchmark_*.json",
+    "benchmark_report_count": 27
+  },
+  "reported_soak_60min": {
+    "report": "reports/stream_benchmark_20261112T045510Z.json",
+    "mode": "soak",
+    "target_rate_eps": 100.0,
+    "duration_s": 3600.0,
+    "events_produced": 360000,
+    "events_processed": 360000,
+    "events_lost": 0,
+    "events_dead_lettered": 0,
+    "events_rejected": 0,
+    "events_duplicate": 0,
+    "effective_eps": 98.7,
+    "wall_seconds": 3648.839,
+    "latency_p50_s": 0.302,
+    "latency_p95_s": 0.883,
+    "latency_p99_s": 1.863,
+    "latency_max_s": 21.856,
+    "config": {
+      "queue_impl": "asyncio",
+      "batch_size": 500,
+      "reorder_window_s": 0.05,
+      "max_hold_s": 0.25,
+      "preload": false
+    },
+    "status": "verified_against_report_json; consistent with fresh 30s sustained run"
+  },
+  "burst_assessment": {
+    "target_eps": 500.0,
+    "status": "not_achieved_as_sustained_burst",
+    "preload_drain_ceiling": {
+      "report": "reports/stream_benchmark_20261112T033832Z.json",
+      "config": "burst 500eps x10s, batch_size=1000, preload=True",
+      "events": 5000,
+      "effective_eps": 289.1,
+      "latency_p50_s": 7.048,
+      "latency_p95_s": 13.425,
+      "note": "preload=True measures pure single-consumer drain throughput after queue fill; honest ceiling figure"
+    },
+    "non_preload_burst": {
+      "report": "reports/stream_benchmark_20261112T040147Z.json",
+      "config": "burst 500eps x10s, batch_size=100, preload=False",
+      "events": 5000,
+      "effective_eps": 410.1,
+      "caveat": "effective_eps denominator is the production window only; post-production drain time is excluded, so this figure is NOT comparable to the preload-drain ceiling and must not be cited as sustained burst throughput"
+    }
+  },
+  "architecture_verification": {
+    "asyncio_queue": {
+      "file": "core/streaming/event_queue.py",
+      "status": "verified",
+      "notes": "bounded asyncio.Queue (50k default); optional JSONL backing with ack tombstones; BackpressureError on saturation; claim_pending respects min_idle_ms"
+    },
+    "redis_streams": {
+      "file": "core/streaming/event_queue.py",
+      "status": "verified_live",
+      "notes": "XADD MAXLEN~/XREADGROUP '>'/XACK; XAUTOCLAIM on >=6.2 with XPENDING+XCLAIM legacy fallback; group creation idempotent (BUSYGROUP tolerated); backpressure via XLEN vs max_depth"
+    },
+    "consumer_groups_xautoclaim": {
+      "status": "verified",
+      "evidence": "tests/test_redis_streams.py (8 tests) passed live on Redis 7.4.8 and 5.0.14.1; consumer-restart recovery test confirms XAUTOCLAIM/XCLAIM reclaim of pending entries"
+    },
+    "pending_recovery": {
+      "status": "verified",
+      "evidence": "test_consumer_restart_recovers_pending; worker claim_pending_interval_s=30s sweep in run_worker"
+    },
+    "checkpoint_restoration": {
+      "status": "verified",
+      "file": "core/streaming/event_checkpoint.py",
+      "evidence": "test_checkpoint_restore_tracker; atomic tempfile+os.replace writes for JSON meta and pickled tracker state; restores tracker state + committed_ids + pending_acks via worker_state"
+    },
+    "replay_idempotency": {
+      "status": "verified",
+      "file": "core/streaming/event_replay.py + event_processor.py",
+      "evidence": "delivery key = (event_id, replay_of); operator replays bypass ingest dedup but downstream committed_ids dedup keeps reprocessing idempotent; test_dlq_write_and_replay, test_replay_of_preserves_duplicate_flagging"
+    },
+    "dlq_accounting": {
+      "status": "verified",
+      "notes": "append-only JSONL DLQ, flush+fsync commit, reason codes (decode/processing_error/late_event/retry_exhausted); benchmark reports dlq_reasons breakdown; events_lost counts only truly unaccounted events"
+    },
+    "late_out_of_order": {
+      "status": "verified",
+      "file": "core/streaming/session_state.py",
+      "notes": "per-stream reorder buffers (timed per user, explicit per user+session); emit when event_ts <= max_ts - reorder_window or max_hold elapsed; earlier-than-frontier arrivals -> DLQ late_event; tests/test_streaming_ordering.py 6 tests"
+    },
+    "batch_stream_parity": {
+      "status": "verified",
+      "evidence": "tests/test_streaming_pipeline.py::TestParity.test_stream_scores_match_batch — all score-contract columns match batch analyze_session_intelligence at atol 1e-9 on 650 events"
+    }
+  },
+  "findings": [
+    {
+      "id": "S41-01",
+      "severity": "informational",
+      "summary": "Non-preload burst effective_eps excludes drain time",
+      "detail": "scripts/stream_benchmark.py computes effective_eps = records_written / production-window elapsed for non-preload modes; drain time after production ends is not included. Burst report stream_benchmark_20261112T040147Z.json shows 410.1 eps which is not a sustained-consumer figure. The preload-drain run (289.1 eps, batch_size=1000) is the honest single-consumer ceiling. Documentation updated to prevent misquoting.",
+      "disposition": "documented; no code change (benchmark harness behavior preserved to avoid altering reported evidence)"
+    },
+    {
+      "id": "S41-02",
+      "severity": "informational",
+      "summary": "committed_ids dedup LRU is in-memory by default",
+      "detail": "run_worker dedup of redelivered queue entries uses a bounded in-memory LRU; cross-restart dedup relies on deterministic re-scoring + consumer-side event_id dedup. Documented in code; acceptable for v1.0 scope.",
+      "disposition": "documented limitation"
+    },
+    {
+      "id": "S41-03",
+      "severity": "informational",
+      "summary": "Checkpoint tracker state uses pickle",
+      "detail": "StreamCheckpoint stores tracker state as pickle (atomic write). Version-sensitive; no schema migration. Local-only deployment makes this acceptable; noted for hardening backlog.",
+      "disposition": "documented limitation"
+    },
+    {
+      "id": "S41-04",
+      "severity": "informational",
+      "summary": "Burst 500 eps target unmet",
+      "detail": "Single-consumer ceiling ~289 eps (preload drain, batch 1000). Meeting 500 eps would require partitioned workers or vectorization — explicitly out of scope per roadmap restrictions.",
+      "disposition": "accepted limitation; carried into CAID_KNOWN_LIMITATIONS.md in Phase 4.5"
+    }
+  ],
+  "conclusion": "All Phase 4.1 verification tasks pass. Reported soak results are corroborated by report JSONs and a fresh 30s sustained run. No architecture changes made. Streaming evidence is consistent and honestly bounded."
+}
