@@ -142,13 +142,16 @@ def export_filtered_data(df: pd.DataFrame, filters: Dict[str, Any],
     metadata_lines = [
         "# Filtered Data Export",
         f"# Total Records: {len(export_df)}",
-        f"# Search Query: {search_query}",
+        f"# Search Query: {' '.join(str(search_query).split())}",
         "# Applied Filters:"
     ]
     
     for key, value in filters.items():
         if value is not None and value != '':
-            metadata_lines.append(f"#   {key}: {value}")
+            # Collapse newlines so a crafted filter value cannot break out
+            # of the '#' comment prefix and inject spreadsheet formulas.
+            safe_value = ' '.join(str(value).split())
+            metadata_lines.append(f"#   {key}: {safe_value}")
     
     # Convert to CSV and prepend metadata
     csv_content = _sanitize_csv_frame(export_df).to_csv(index=False)

@@ -196,6 +196,21 @@ class TestFormulaInjectionAllPaths:
         df = pd.DataFrame({'user_id': [self.EVIL], 'v': [1]})
         self._assert_safe(export_filtered_data(df, {'user_id': self.EVIL}))
 
+    def test_export_filtered_data_metadata_newline_injection(self):
+        # A filter value containing newlines must not break out of the '#'
+        # comment prefix and inject unsanitized spreadsheet-formula lines.
+        df = pd.DataFrame({'user_id': ['u1'], 'v': [1]})
+        evil = 'x\n=cmd|"/c calc"!A1\n@SUM(1)'
+        out = export_filtered_data(
+            df, {'user_id': evil}, search_query=evil).decode('utf-8')
+        for line in out.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith('#') or stripped.startswith('user_id'):
+                continue
+            assert not stripped.startswith(('=', '+', '-', '@', '\t'))
+
     def test_export_ip_investigation(self):
         self._assert_safe(export_ip_investigation(
             {'ip_address': self.EVIL, 'unusual_indicators': [self.EVIL]}))
