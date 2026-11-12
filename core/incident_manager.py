@@ -29,14 +29,54 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
 import tempfile
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, Iterator, List, Optional
 
 import numpy as np
 import pandas as pd
+
+if sys.platform == 'win32':
+    import msvcrt
+else:
+    import fcntl
+
+
+@contextmanager
+def _file_lock(file_obj, exclusive: bool) -> Iterator[None]:
+    """Cross-platform advisory file lock (best-effort).
+
+    Uses ``msvcrt.locking`` on Windows and ``fcntl.flock`` on POSIX.
+    Failures are non-fatal — the atomic tempfile + os.replace write still
+    protects against torn writes.
+    """
+    fd = file_obj.fileno()
+    try:
+        if sys.platform == 'win32':
+            msvcrt.locking(fd, msvcrt.LK_NBLCK if exclusive
+                           else msvcrt.LK_NBRLCK, 1)
+        else:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB if exclusive
+                        else fcntl.LOCK_SH | fcntl.LOCK_NB)
+    except OSError:
+        # Could not acquire (held by another process / sync client).
+        # Fall through without locking; atomic replace still safe.
+        pass
+    try:
+        yield
+    finally:
+        try:
+            if sys.platform == 'win32':
+                file_obj.seek(0)
+                msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+        except OSError:
+            pass
 
 
 @dataclass
@@ -161,7 +201,8 @@ class IncidentStore:
             return
         try:
             with open(self.path, 'r', encoding='utf-8') as fh:
-                data = json.load(fh)
+                with _file_lock(fh, exclusive=False):
+                    data = json.load(fh)
             if isinstance(data, dict):
                 data = data.get('incidents', [])
             if not isinstance(data, list):
@@ -175,31 +216,38 @@ class IncidentStore:
         directory = os.path.dirname(self.path)
         if directory:
             os.makedirs(directory, exist_ok=True)
+        lock_path = self.path + '.lock'
         payload = {'incidents': self.incidents}
-        fd, tmp = tempfile.mkstemp(dir=directory or '.', suffix='.tmp')
-        try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as fh:
-                json.dump(payload, fh, indent=2, default=str)
-            # os.replace can transiently fail on Windows (WinError 5/32)
-            # when the destination is held by sync clients (e.g. OneDrive)
-            # or AV scanners — retry briefly before giving up.
-            last_exc = None
-            for attempt in range(5):
+        # Hold an exclusive advisory lock for the duration of the write +
+        # replace so concurrent savers serialize and a reader never sees a
+        # half-written state.
+        with open(lock_path, 'a+b') as lock_fh:
+            with _file_lock(lock_fh, exclusive=True):
+                fd, tmp = tempfile.mkstemp(
+                    dir=directory or '.', suffix='.tmp')
                 try:
-                    os.replace(tmp, self.path)
-                    break
-                except OSError as exc:
-                    last_exc = exc
-                    if attempt < 4:
-                        time.sleep(0.1 * (attempt + 1))
-            else:
-                raise last_exc
-        except Exception:
-            try:
-                os.unlink(tmp)
-            except OSError:
-                pass
-            raise
+                    with os.fdopen(fd, 'w', encoding='utf-8') as fh:
+                        json.dump(payload, fh, indent=2, default=str)
+                    # os.replace can transiently fail on Windows (WinError
+                    # 5/32) when the destination is held by sync clients
+                    # (e.g. OneDrive) or AV scanners — retry briefly.
+                    last_exc = None
+                    for attempt in range(5):
+                        try:
+                            os.replace(tmp, self.path)
+                            break
+                        except OSError as exc:
+                            last_exc = exc
+                            if attempt < 4:
+                                time.sleep(0.1 * (attempt + 1))
+                    else:
+                        raise last_exc
+                except Exception:
+                    try:
+                        os.unlink(tmp)
+                    except OSError:
+                        pass
+                    raise
 
     def get(self, incident_id: str) -> Optional[Dict]:
         for inc in self.incidents:

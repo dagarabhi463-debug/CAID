@@ -24,8 +24,8 @@ Honest bounds. Nothing here is a defect; all are documented design or evidence l
 12. **No authentication** — bind to localhost only; never expose the port.
 13. **Plaintext local services** (Ollama HTTP, Redis RESP); use TLS endpoints if remote.
 14. **Model/checkpoint artifacts are unsigned** — protect `models/` via filesystem permissions (SEC-004).
-15. **MITRE bundle has no integrity pin** — JSON-only parsing bounds impact (SEC-003).
-16. **Traceback shown on upload errors** (SEC-002); arbitrary path display on Streaming health page (SEC-007).
+15. ~~**MITRE bundle has no integrity pin**~~ — **resolved.** `core/mitre_attack.py` now pins a SHA-256 hash in `data/mitre_attack/mitre_attack_meta.json`; cached bundles failing the hash check are rejected (SEC-003).
+16. ~~**Traceback shown on upload errors / arbitrary path display**~~ — **resolved.** `modules/log_analysis.py` logs tracebacks server-side via `logger.exception()` and shows a generic UI message (SEC-002); `app_pages/streaming_health.py` restricts displayed checkpoint/DLQ paths to within the project directory (SEC-007).
 
 ## Platform
 
@@ -33,3 +33,24 @@ Honest bounds. Nothing here is a defect; all are documented design or evidence l
 18. **Retrospective analysis model** — correlation/incidents describe the analyzed window; streaming detection exists but the dashboard correlation layer is batch-oriented.
 19. **Shared-IP ambiguity** — IP is a weak corroborating signal by policy (NAT/VPN).
 20. **PROJECT_DOCUMENTATION.md predates v2_0** — section 11 is stale; this file + `RELEASE_NOTES.md` are authoritative for v1.0.
+
+## Resolved since v1.0 (audit hardening pass)
+
+- **ReDoS in Events search** — `app_pages/events.py` now passes `regex=False` to `str.contains()` so user filter input is treated as a literal substring.
+- **Events page hard cap removed** — the Events list now supports page-size selection (100/250/500/1000/2500) plus page navigation; the detail selectbox cap was raised 200 → 500.
+- **Incident store file locking** — `core/incident_manager.py` uses `msvcrt`/`fcntl` advisory locks (shared on read, exclusive on write) so concurrent dashboard sessions can't corrupt `incidents.json`.
+- **`replay_timerange` sync wrapper** — `core/streaming/event_replay.py` no longer raises `NotImplementedError`; it runs `replay_timerange_async` via `asyncio.run` in a worker thread.
+- **AI chat persistence** — `app_pages/ai_analyst.py` saves per-scenario chat history to `data/ai_chat/*.json` and reloads it on first visit; a "Clear chat history" button is provided.
+
+## Remaining design bounds (not code defects)
+
+The following are intentional scope decisions, not bugs — removing them would change the product's purpose and are out of scope for a hardening pass:
+
+- **No authentication (SEC-005)** — localhost-only by design.
+- **Plaintext Ollama/Redis (SEC-006)** — supports TLS URLs; no default cert management.
+- **Unsigned model artifacts (SEC-004)** — `joblib.load`/`pickle.loads` on local files; mitigate via filesystem permissions.
+- **Streaming not wired into dashboard (F-1)** — Streaming health page is observational only (reads benchmark JSON).
+- **Log Analysis uses separate session state (F-2)** — doesn't feed Correlation/Investigation/MITRE/AI.
+- **Synthetic data only (D-1)** — no real-world validation set exists.
+- **Hardcoded detection thresholds/weights (D-7)** — no UI tuning surface.
+- **Burst ceiling ~289 eps (P-1)** — below the 500 eps target; requires performance rework.

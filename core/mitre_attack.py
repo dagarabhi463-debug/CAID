@@ -19,6 +19,7 @@ Mapping contract:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import urllib.request
@@ -267,6 +268,7 @@ class MitreAttackStore:
 
     def _download(self) -> None:
         raw = self._fetcher()
+        sha256 = hashlib.sha256(raw).hexdigest()
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.bundle_path, 'wb') as fh:
             fh.write(raw)
@@ -274,6 +276,7 @@ class MitreAttackStore:
             'source_url': STIX_URL,
             'retrieved_at': datetime.now(timezone.utc).isoformat(),
             'bytes': len(raw),
+            'sha256': sha256,
         }
         try:
             bundle = json.loads(raw.decode('utf-8'))
@@ -308,9 +311,32 @@ class MitreAttackStore:
     # ------------------------------------------------------------------
 
     def _load(self) -> bool:
+        # Integrity check: if the meta records a SHA-256, verify the
+        # cached bundle matches it. A mismatch indicates tampering or
+        # corruption → refuse to load and surface the error.
+        expected = None
+        if os.path.exists(self.meta_path):
+            try:
+                with open(self.meta_path, 'r', encoding='utf-8') as fh:
+                    expected = json.load(fh).get('sha256')
+            except Exception:
+                expected = None
         try:
-            with open(self.bundle_path, 'r', encoding='utf-8') as fh:
-                bundle = json.load(fh)
+            with open(self.bundle_path, 'rb') as fh:
+                raw = fh.read()
+        except Exception as exc:
+            self.load_error = f'cache unreadable: {exc}'
+            return False
+        if expected:
+            actual = hashlib.sha256(raw).hexdigest()
+            if actual != expected:
+                self.load_error = (
+                    'bundle integrity check failed: sha256 mismatch '
+                    f'(expected {expected[:12]}…, got {actual[:12]}…). '
+                    'Re-download the MITRE dataset from the Settings page.')
+                return False
+        try:
+            bundle = json.loads(raw.decode('utf-8'))
         except Exception as exc:
             self.load_error = f'cache unreadable: {exc}'
             return False

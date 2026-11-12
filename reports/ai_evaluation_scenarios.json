@@ -1,0 +1,12 @@
+[
+  {
+    "id": "attack_chain",
+    "description": "Attack-chain reconstruction with MITRE maps",
+    "category": "Incident investigation"
+  },
+  {
+    "id": "hunt_failed_auth",
+    "description": "Predefined hunt query (failed logins)",
+    "category": "Numerical reasoning"
+  }
+]

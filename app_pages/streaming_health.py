@@ -3,19 +3,49 @@
 import glob
 import os
 
+import pandas as pd
 import streamlit as st
 
 from core.streaming.health import (
-    checkpoint_meta, dlq_summary, health_snapshot, latest_benchmark_report)
+    checkpoint_meta, dlq_summary, health_snapshot, latest_benchmark_report,
+    latest_file, scored_events_frame)
 
 st.title("Streaming health")
 st.caption("Observational pipeline telemetry for the streaming research prototype. "
            "These metrics never feed back into detection scores.")
 
+
+def _safe_data_path(raw: str, label: str) -> str | None:
+    """Restrict user-supplied paths to the project ``data/`` tree.
+
+    Returns the resolved absolute path if it lives under the project
+    directory, otherwise ``None`` (with a warning shown). This prevents
+    the observational read-only inputs from being pointed at arbitrary
+    files outside the project.
+    """
+    if not raw:
+        return None
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                 os.pardir))
+    candidate = os.path.abspath(raw)
+    try:
+        common = os.path.commonpath([candidate, project_root])
+    except ValueError:
+        common = ''
+    if common != project_root:
+        st.warning(f"{label} path is outside the project directory and "
+                   "will not be read for safety.")
+        return None
+    return candidate
+
+
 checkpoint_path = st.text_input(
     "Checkpoint path", value="data/stream_checkpoint/stream_checkpoint.json")
 dlq_path = st.text_input(
     "DLQ path", value="", placeholder="Leave blank to use the latest benchmark DLQ")
+
+checkpoint_path = _safe_data_path(checkpoint_path, "Checkpoint")
+dlq_path = _safe_data_path(dlq_path, "DLQ")
 
 if not dlq_path:
     dlq_files = glob.glob(os.path.join("data", "stream_dlq", "bench_*.jsonl"))
@@ -78,6 +108,45 @@ with st.expander("Queue, checkpoint, and DLQ"):
             hide_index=True, width="stretch")
     else:
         st.caption("No DLQ entries recorded.")
+
+with st.expander("Streaming detection results"):
+    results_dir = st.text_input(
+        "Results directory", value="data/stream_results",
+        key="sh_results_dir")
+    results_dir = _safe_data_path(results_dir, "Results")
+    res_path = (latest_file(results_dir or "", "*.jsonl")
+                if results_dir else None)
+    df_res, n_res = scored_events_frame(res_path, max_rows=500)
+    st.markdown(f"**Sink file:** `{res_path or 'none'}`  ")
+    if df_res.empty:
+        st.info("No committed streaming results found. Run "
+                "`scripts/stream_benchmark.py` or the streaming worker "
+                "to produce scored output here.")
+    else:
+        n_late = int(df_res.get('is_late_event',
+                                pd.Series([False] * len(df_res)))
+                     .fillna(False).astype(bool).sum()) \
+            if 'is_late_event' in df_res.columns else 0
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Scored events (file)", n_res)
+        c2.metric("Late events rescored", n_late)
+        if 'combined_score' in df_res.columns:
+            scores = pd.to_numeric(df_res['combined_score'],
+                                   errors='coerce')
+            c3.metric("Mean combined score",
+                      f"{scores.mean():.3f}" if scores.notna().any()
+                      else "n/a")
+        show_cols = [c for c in (
+            'timestamp', 'user_id', 'session_id', 'event_type',
+            'combined_score', 'risk_level', 'is_anomaly',
+            'is_late_event', 'detection_latency_ms')
+            if c in df_res.columns]
+        st.dataframe(df_res[show_cols].tail(100), hide_index=True,
+                     width="stretch")
+        st.caption("Rows are the durable committed output of the "
+                   "streaming worker (result sink). 'is_late_event' "
+                   "marks out-of-band rescored late arrivals — additive "
+                   "evidence; causal positions are never rewritten.")
 
 with st.expander("Registry counters"):
     counters = (snap.get("monitor") or {}).get("counters") or {}

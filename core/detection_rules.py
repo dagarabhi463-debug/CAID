@@ -49,6 +49,90 @@ class DetectionRule:
     weight: float = 0.1
 
 
+def _compile_node(node: ast.AST):
+    """Compile a validated AST node into ``fn(row, threshold) -> value``.
+
+    The AST has already passed ``_SafeCondition._validate`` (allow-listed
+    node types only — no calls, attribute access, imports, or indexing),
+    so building plain Python closures over it cannot execute arbitrary
+    code. This removes the per-node ``isinstance`` dispatch of the
+    interpreter on the hot per-row path while preserving identical
+    semantics, including short-circuiting, comparison chaining, and the
+    ``None`` -> ``False`` comparison rule.
+    """
+    if isinstance(node, ast.Constant):
+        value = node.value
+        return lambda row, thr: value
+
+    if isinstance(node, ast.Name):
+        if node.id == "threshold":
+            return lambda row, thr: thr
+        name = node.id
+        return lambda row, thr: row.get(name)
+
+    if isinstance(node, ast.List):
+        fns = [_compile_node(e) for e in node.elts]
+        return lambda row, thr: [f(row, thr) for f in fns]
+
+    if isinstance(node, ast.Tuple):
+        fns = [_compile_node(e) for e in node.elts]
+        return lambda row, thr: tuple(f(row, thr) for f in fns)
+
+    if isinstance(node, ast.Set):
+        fns = [_compile_node(e) for e in node.elts]
+        return lambda row, thr: {f(row, thr) for f in fns}
+
+    if isinstance(node, ast.BoolOp):
+        fns = [_compile_node(v) for v in node.values]
+        if isinstance(node.op, ast.And):
+            def _and(row, thr):
+                for f in fns:
+                    if not f(row, thr):
+                        return False
+                return True
+            return _and
+        if isinstance(node.op, ast.Or):
+            def _or(row, thr):
+                for f in fns:
+                    if f(row, thr):
+                        return True
+                return False
+            return _or
+        raise RuleConfigurationError("Unsupported boolean operator.")
+
+    if isinstance(node, ast.UnaryOp):
+        if isinstance(node.op, ast.Not):
+            operand = _compile_node(node.operand)
+            return lambda row, thr: not bool(operand(row, thr))
+        raise RuleConfigurationError("Unsupported unary operator.")
+
+    if isinstance(node, ast.Compare):
+        left_fn = _compile_node(node.left)
+        ops = []
+        for op_node, comparator in zip(node.ops, node.comparators):
+            operation = _SafeCondition.COMPARISON_OPERATORS.get(
+                type(op_node))
+            if operation is None:
+                raise RuleConfigurationError(
+                    "Unsupported comparison operator.")
+            ops.append((operation, _compile_node(comparator)))
+
+        def _compare(row, thr):
+            left = left_fn(row, thr)
+            for operation, right_fn in ops:
+                right = right_fn(row, thr)
+                if left is None or right is None:
+                    return False
+                if not operation(left, right):
+                    return False
+                left = right
+            return True
+        return _compare
+
+    raise RuleConfigurationError(
+        f"Unsupported expression node: {type(node).__name__}")
+
+
 class _SafeCondition:
     """
     Safely evaluates a limited subset of Python expressions.
@@ -119,6 +203,7 @@ class _SafeCondition:
             ) from exc
 
         self._validate(self.tree)
+        self._fn = _compile_node(self.tree.body)
 
     def _validate(self, node: ast.AST) -> None:
         """Reject every AST node outside the explicit allow-list."""
@@ -159,11 +244,7 @@ class _SafeCondition:
         """Evaluate the condition against one event row."""
 
         try:
-            result = self._evaluate_node(
-                self.tree.body,
-                row,
-                threshold,
-            )
+            result = self._fn(row, threshold)
             return bool(result)
         except (
             TypeError,
@@ -583,9 +664,11 @@ class DetectionRulesEngine:
             result["is_suspicious"] = pd.Series(dtype=bool)
             return result
 
+        # to_dict('records') is far cheaper than iterrows(): plain dicts
+        # feed check_rules directly (it accepts dict or Series).
         evaluations = [
             self.check_rules(row)
-            for _, row in result.iterrows()
+            for row in result.to_dict('records')
         ]
 
         result["triggered_rules"] = [

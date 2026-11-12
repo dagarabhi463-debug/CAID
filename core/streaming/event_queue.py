@@ -105,7 +105,18 @@ class AsyncioEventQueue(EventQueue):
         self._acked: set = set()
         self._closed = False
         self._loop_bounds = 0
+        # Persistent file handles kept open for the lifetime of the queue
+        # so enqueue/ack don't pay open/close per event. Writes are
+        # buffered by the OS (page-cache durable against process crashes);
+        # explicit flush happens on close().
+        self._persist_fh = None
+        self._acked_fh = None
         if persist_path:
+            os.makedirs(os.path.dirname(os.path.abspath(persist_path)),
+                        exist_ok=True)
+            self._persist_fh = open(persist_path, 'a', encoding='utf-8')
+            acked_path = persist_path + '.acked'
+            self._acked_fh = open(acked_path, 'a', encoding='utf-8')
             self._load_backing()
 
     # -- durable backing -------------------------------------------------
@@ -144,19 +155,16 @@ class AsyncioEventQueue(EventQueue):
             self._queue.put_nowait(qid)
 
     def _persist_enqueue(self, queue_id: str, payload: Dict[str, Any]) -> None:
-        if not self.persist_path:
+        if not self.persist_path or self._persist_fh is None:
             return
-        os.makedirs(os.path.dirname(os.path.abspath(self.persist_path)),
-                    exist_ok=True)
-        with open(self.persist_path, 'a', encoding='utf-8') as f:
-            f.write(json.dumps({'queue_id': queue_id, 'payload': payload},
-                               default=str) + '\n')
+        self._persist_fh.write(
+            json.dumps({'queue_id': queue_id, 'payload': payload},
+                       default=str) + '\n')
 
     def _persist_ack(self, queue_id: str) -> None:
-        if not self.persist_path:
+        if not self.persist_path or self._acked_fh is None:
             return
-        with open(self.persist_path + '.acked', 'a', encoding='utf-8') as f:
-            f.write(json.dumps({'queue_id': queue_id}) + '\n')
+        self._acked_fh.write(json.dumps({'queue_id': queue_id}) + '\n')
         self._acked.add(queue_id)
 
     # -- EventQueue API ---------------------------------------------------

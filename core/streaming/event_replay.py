@@ -128,11 +128,21 @@ def replay_timerange(sink_path: str, ingestor, *,
                      start_utc: str, end_utc: str) -> List:
     """
     Re-feed scored events whose ``timestamp`` falls in [start, end) through
-    the identical pipeline. Synchronous convenience wrapper — callers in
-    async contexts should iterate ``ingestor.ingest`` directly.
+    the identical pipeline. Synchronous convenience wrapper — runs the async
+    implementation in a dedicated thread's event loop so it can be called
+    from sync callers (and from within an already-running event loop).
     """
-    raise NotImplementedError(
-        'Use replay_timerange_async in async pipeline contexts')
+    import asyncio
+
+    async def _run():
+        return await replay_timerange_async(
+            sink_path, ingestor, start_utc=start_utc, end_utc=end_utc)
+
+    # Run the coroutine on a fresh event loop in a worker thread so this
+    # works whether or not the caller already holds a running loop.
+    import concurrent.futures
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(asyncio.run, _run()).result()
 
 
 async def replay_timerange_async(sink_path: str, ingestor, *,

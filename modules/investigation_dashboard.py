@@ -13,6 +13,7 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 import streamlit as st
+from utils.errors import safe_error_message
 
 from modules.correlation_dashboard import analyze_correlation, _evidence_json
 from modules.scenario_data import (
@@ -149,7 +150,7 @@ def render_investigation_page() -> None:
                 st.success("Analysis and incident grouping complete.")
                 st.rerun()
             except Exception as e:
-                st.error(f"Investigation analysis failed: {e}")
+                st.error(safe_error_message(e, "Investigation analysis failed"))
                 return
         return
 

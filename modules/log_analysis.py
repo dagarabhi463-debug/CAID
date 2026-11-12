@@ -5,11 +5,15 @@ This module provides functionality for uploading, validating, searching,
 filtering, and investigating security logs with a professional UI.
 """
 
+import logging
+
 import streamlit as st
 import pandas as pd
 import io
 from typing import Tuple, Dict, Any, List, Optional
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 from core.log_processor import (
     get_dataset_statistics,
@@ -841,14 +845,43 @@ def display_log_analysis():
                     
                     # Display export options
                     display_csv_exports(df_processed, df_original)
-                    
+
+                    # F-2 bridge: feed the uploaded dataset into the
+                    # shared analysis state so Correlation and
+                    # Investigation pages can consume it.
+                    if st.button("Use uploaded data for Correlation & "
+                                 "Investigation", key="f2_bridge"):
+                        try:
+                            from modules.correlation_dashboard import (
+                                analyze_correlation)
+                            from modules.analysis_state import ANALYSIS_KEY
+                            with st.spinner("Running correlation pipeline "
+                                            "on uploaded data…"):
+                                result = analyze_correlation(df_processed)
+                            result['scenario_key'] = 'uploaded'
+                            result['scenario_label'] = \
+                                f"Uploaded file ({uploaded_file.name})"
+                            from modules.analysis_state import get_manager
+                            get_manager().build_incidents(
+                                result.get('correlations'))
+                            st.session_state[ANALYSIS_KEY] = result
+                            st.success("Uploaded data is now the active "
+                                       "analysis — open Correlation or "
+                                       "Investigation.")
+                            st.rerun()
+                        except Exception as exc:
+                            from utils.errors import safe_error_message
+                            st.error(safe_error_message(
+                                exc, "Correlation analysis failed"))
+
                     # Re-run to show dashboard with new data
                     st.rerun()
                     
             except Exception as e:
+                logger.exception("Log analysis upload/processing failed")
                 st.error(f"Error processing file: {str(e)}")
-                import traceback
-                st.error(traceback.format_exc())
+                st.caption("Full details have been logged server-side; "
+                           "check the application logs for the traceback.")
 
 
 def analyze_uploaded_data(df: pd.DataFrame) -> pd.DataFrame:

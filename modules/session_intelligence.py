@@ -13,6 +13,7 @@ from typing import Optional
 
 import pandas as pd
 import streamlit as st
+from utils.errors import safe_error_message
 
 from core.log_processor import load_sample_dataset
 from core.detection_rules import DetectionRulesEngine
@@ -126,7 +127,7 @@ def render_session_intelligence_page() -> None:
                 st.success("Session/sequence analysis complete.")
                 st.rerun()
             except Exception as e:
-                st.error(f"Session intelligence analysis failed: {e}")
+                st.error(safe_error_message(e, "Session intelligence analysis failed"))
                 return
         return
 

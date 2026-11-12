@@ -16,9 +16,11 @@ from core.ai_context import (
 from core.ai_analyst import (
     ask,
     explain_event,
+    explain_finding,
     generate_investigation_summary,
     hunt,
     investigate_attack_chain,
+    summarize_incident,
 )
 from core.ollama_client import OllamaUnavailable
 
@@ -151,7 +153,8 @@ def test_explain_event_with_fake_client(scored_df):
         def resolve_model(self):
             return 'fake-model'
 
-        def generate(self, prompt, model=None, system=None, stream=False):
+        def generate(self, prompt, model=None, system=None, stream=False,
+                 options=None):
             assert 'UNTRUSTED_DATA' in prompt
             return 'AI explanation citing evidence.'
 
@@ -243,3 +246,81 @@ def test_attack_chain_and_summary_fallback(scored_df):
                                              client=DeadClient())
     assert 'deterministic evidence summary' in summary['text'].lower()
     assert summary['matched_event_count'] == 2
+
+
+class StreamClient:
+    """Fake Ollama client that supports streaming."""
+
+    model = 'fake-model'
+
+    def __init__(self, chunks=('Hello', ' world')):
+        self.chunks = chunks
+        self.prompts = []
+
+    def resolve_model(self):
+        return 'fake-model'
+
+    def generate(self, prompt, model=None, system=None, stream=False,
+                 options=None):
+        self.prompts.append(prompt)
+        if stream:
+            return iter(self.chunks)
+        return ''.join(self.chunks)
+
+
+def test_on_chunk_streaming(scored_df):
+    client = StreamClient()
+    received = []
+    resp = explain_event(scored_df.iloc[0], scored_df, client=client,
+                         on_chunk=received.append)
+    assert resp['degraded'] is False
+    assert resp['text'] == 'Hello world'
+    assert received == ['Hello', ' world']
+
+
+def test_ask_freeform_uses_event_sample(scored_df):
+    client = StreamClient()
+    resp = ask('what time was the last event?', scored_df, client=client)
+    assert resp['degraded'] is False
+    assert 'UNTRUSTED_DATA' in client.prompts[0]
+    assert 'event_sample' in client.prompts[0]
+    assert 'bulk_download' in client.prompts[0]
+    assert any('Event sample' in e for e in resp['evidence_used'])
+
+
+def test_ask_includes_conversation_history(scored_df):
+    client = StreamClient()
+    history = [{'role': 'user', 'text': 'how many users?'},
+               {'role': 'assistant', 'text': 'There are 2 users.'}]
+    ask('and what about u1?', scored_df, client=client, history=history)
+    assert 'conversation_history' in client.prompts[0]
+    assert 'how many users?' in client.prompts[0]
+
+
+def test_hunt_empty_result_skips_ollama(scored_df):
+    class NoCallClient(StreamClient):
+        def generate(self, *a, **k):
+            raise AssertionError('Ollama should not be called')
+
+    # 'auth failure bursts' matches a query, but no burst has >=3
+    # failures in this fixture, so narration must be skipped.
+    resp = hunt('show authentication failure bursts', scored_df,
+                client=NoCallClient())
+    assert resp['matched'] is True
+    assert len(resp['rows']) == 0
+    assert resp['degraded'] is False
+    assert 'No matching rows' in resp['text']
+
+
+def test_ask_fallback_still_lists_stats(scored_df):
+    class DeadClient:
+        model = 'none'
+
+        def resolve_model(self):
+            return None
+
+        def generate(self, *a, **k):
+            raise OllamaUnavailable('down')
+
+    resp = ask('why is this interesting?', scored_df, client=DeadClient())
+    assert 'Dataset statistics' in resp['text']

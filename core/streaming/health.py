@@ -46,6 +46,31 @@ def dlq_summary(path: Optional[str]) -> Dict:
             'reasons': dict(reasons)}
 
 
+def latest_file(directory: str, pattern: str = '*.jsonl'
+                ) -> Optional[str]:
+    """Newest file matching ``pattern`` under ``directory`` (mtime)."""
+    paths = glob.glob(os.path.join(directory, pattern))
+    if not paths:
+        return None
+    return max(paths, key=os.path.getmtime)
+
+
+def scored_events_frame(path: Optional[str], max_rows: int = 500):
+    """Read a result-sink JSONL into a DataFrame (newest rows kept).
+
+    Returns ``(df, total_records)``; the frame is capped at ``max_rows``
+    most recent records for UI responsiveness.
+    """
+    import pandas as pd
+    if not path or not os.path.exists(path):
+        return pd.DataFrame(), 0
+    records = read_jsonl_events(path)
+    total = len(records)
+    if total > max_rows:
+        records = records[-max_rows:]
+    return pd.DataFrame(records), total
+
+
 def health_snapshot(*, monitor: Optional[MetricsRegistry] = None,
                     benchmark: Optional[Dict] = None,
                     checkpoint: Optional[Dict] = None,

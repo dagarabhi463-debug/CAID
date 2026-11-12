@@ -29,6 +29,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ---- Optional access-token gate (CAID_UI_TOKEN) ----------------------------
+from core.ui_auth import (check_ui_token, mark_verified, token_verified,
+                          ui_token_required)
+if ui_token_required() and not token_verified(st.session_state):
+    st.title("CAID — Access required")
+    st.caption("This deployment requires an access token "
+               "(CAID_UI_TOKEN).")
+    entered = st.text_input("Access token", type="password",
+                            key="caid_ui_token_input")
+    if st.button("Unlock", key="caid_ui_unlock"):
+        if check_ui_token(entered):
+            mark_verified(st.session_state)
+            st.rerun()
+        else:
+            st.error("Invalid token.")
+    st.stop()
+
 # ---- Sidebar: scenario selection ------------------------------------------
 with st.sidebar:
     st.markdown("### 🛡️ CAID")

@@ -543,6 +543,12 @@ class BehavioralBaselineManager:
             'thresholds': self.thresholds,
             'fit_event_count': self._fit_event_count,
         }, path)
+        # Integrity sidecar: tampering/corruption is detected at load.
+        try:
+            from core.artifact_integrity import write_checksum
+            write_checksum(path)
+        except Exception:
+            pass
 
     def load(self, path: str) -> 'BehavioralBaselineManager':
         """
@@ -553,6 +559,15 @@ class BehavioralBaselineManager:
         """
         if not os.path.exists(path):
             raise FileNotFoundError(f"Baseline artifact not found: {path}")
+        # Integrity check: a present .sha256 sidecar must match.
+        try:
+            from core.artifact_integrity import verify_checksum
+            if not verify_checksum(path):
+                raise ValueError(
+                    f"Baseline artifact checksum mismatch at {path}: "
+                    f"file may be tampered or corrupted")
+        except ImportError:
+            pass
         data = joblib.load(path)
         if not isinstance(data, dict):
             raise ValueError(f"Invalid baseline artifact at {path}")

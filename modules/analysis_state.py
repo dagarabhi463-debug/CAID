@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Dict, Optional
 
 import streamlit as st
+from utils.errors import safe_error_message
 
 from modules.scenario_data import (
     DEFAULT_SCENARIO_KEY,
@@ -79,7 +80,7 @@ def analysis_or_prompt() -> Optional[Dict]:
             st.success("Analysis complete.")
             st.rerun()
         except Exception as exc:
-            st.error(f"Analysis failed: {exc}")
+            st.error(safe_error_message(exc, "Analysis failed"))
             return None
     else:
         st.info("Select a scenario in the sidebar, then load and analyze "

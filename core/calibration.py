@@ -202,6 +202,11 @@ def save_calibration(
         artifact['session_config'] = session_config
         artifact['sequence_config'] = sequence_config
     joblib.dump(artifact, path)
+    try:
+        from core.artifact_integrity import write_checksum
+        write_checksum(path)
+    except Exception:
+        pass
     return artifact
 
 
@@ -232,6 +237,14 @@ def load_calibration(path: Optional[str] = None,
 
     if not os.path.exists(path):
         raise CalibrationUnavailable(f'Calibration artifact not found: {path}')
+
+    try:
+        from core.artifact_integrity import verify_checksum
+        if not verify_checksum(path):
+            raise CalibrationUnavailable(
+                f'Calibration artifact checksum mismatch at {path}')
+    except ImportError:
+        pass
 
     try:
         data = joblib.load(path)

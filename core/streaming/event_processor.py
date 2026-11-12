@@ -96,9 +96,21 @@ class StreamingDetectionProcessor:
     """
 
     def __init__(self, artifacts: DetectionArtifacts,
-                 monitor: Optional[MetricsRegistry] = None):
+                 monitor: Optional[MetricsRegistry] = None,
+                 late_event_policy: str = 'dlq'):
+        """
+        Args:
+            late_event_policy: 'dlq' (default) dead-letters late events;
+                'rescore' additionally scores them out-of-band as
+                isolated rows flagged ``is_late_event`` — committed
+                scores are never rewritten, the rescored row is purely
+                additive evidence for the analyst.
+        """
         self.artifacts = artifacts
         self.monitor = monitor or MetricsRegistry()
+        self.late_event_policy = (late_event_policy
+                                  if late_event_policy in ('dlq', 'rescore')
+                                  else 'dlq')
 
     # ------------------------------------------------------------------
     # Artifact loading (identical to analyze_session_intelligence)
@@ -189,6 +201,7 @@ class StreamingDetectionProcessor:
         'structured_evidence', 'risk_score', 'risk_calibration_status',
         'detection_calibration_status', 'threshold_version',
         'artifact_statuses',
+        'is_late_event', 'late_ordering_detail',
     )
 
     def process_rows(self, rows: List[Dict]) -> List[Dict]:
@@ -208,8 +221,10 @@ class StreamingDetectionProcessor:
         df = art.detector.predict(df)
 
         # --- Risk channel (per-row; fixed calibrated thresholds) ---------
+        from utils.row_view import RowView
         risk_scores, risk_factors, risk_levels, risk_evidence = [], [], [], []
-        for _, row in df.iterrows():
+        for rec in df.to_dict('records'):
+            row = RowView(rec)
             score, factors = art.risk_engine.calculate_risk_score(row)
             risk_scores.append(score)
             risk_factors.append(factors)
@@ -244,7 +259,8 @@ class StreamingDetectionProcessor:
 
         out: List[Dict] = []
         scored_dt = _parse_iso(scored_at)
-        for _, row in df.iterrows():
+        for rec in df.to_dict('records'):
+            row = RowView(rec)
             rec = {c: row.get(c) for c in self._OUTPUT_COLUMNS if c in row.index}
             ingested = _parse_iso(rec.get('ingested_at_utc'))
             scored = scored_dt
@@ -527,17 +543,31 @@ class StreamingDetectionProcessor:
             rows.extend(r)
             late_events.extend(l)
 
-        # Late events -> DLQ (reason late_event), then ack. The tracker
-        # records the emitted ordering frontier for traceability.
+        # Late events: default policy dead-letters them (reason
+        # late_event), then acks. The tracker records the emitted
+        # ordering frontier for traceability. With late_event_policy=
+        # 'rescore' the event is ALSO scored out-of-band as an isolated
+        # row flagged is_late_event — additive evidence only; the
+        # already-committed causal position is never rewritten. The
+        # pending_acks entry is kept so the queue ack still happens
+        # only after the rescored row is durably committed.
         late_ids = []
         late_details = getattr(self.artifacts.tracker, 'late_details', {})
+        rescored_late = []
         for ev in late_events:
             dkey = _event_delivery_key(ev)
             qid = event_queue_ids.get(dkey)
+            detail = late_details.pop(ev.event_id, {})
+            if self.late_event_policy == 'rescore':
+                row = ev.to_dict()
+                row['is_late_event'] = True
+                row['late_ordering_detail'] = detail
+                rescored_late.append(row)
+                continue
             pending_acks.pop(dkey, None)
             dlq.write({'event': ev.to_dict(), 'reason': 'late_event',
                        'stage': 'ordering',
-                       'detail': late_details.pop(ev.event_id, {}),
+                       'detail': detail,
                        'queue_id': qid})
             if qid:
                 late_ids.append(qid)
@@ -546,6 +576,10 @@ class StreamingDetectionProcessor:
             await queue.ack(late_ids)
             self.monitor.dlq_depth(dlq.depth())
             self.monitor.dead_letter('late_event')
+        if rescored_late:
+            rows.extend(rescored_late)
+            self.monitor.incr('caid_late_events_rescored_total',
+                              len(rescored_late))
 
         if not rows:
             # All events buffered for ordering — nothing to commit/ack yet.

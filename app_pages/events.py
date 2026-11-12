@@ -74,7 +74,7 @@ def _apply_filters(df: pd.DataFrame) -> pd.DataFrame:
         mask = pd.Series(False, index=out.index)
         for col in fields:
             mask |= out[col].astype(str).str.contains(
-                search, case=False, na=False)
+                search, case=False, na=False, regex=False)
         out = out[mask]
 
     return out
@@ -134,7 +134,27 @@ if result is not None:
             else show_cols[0]
         view = filtered.sort_values(sort_col, ascending=False,
                                     na_position='last')
-        st.dataframe(view[show_cols].head(500), hide_index=True,
+
+        # ---- Pagination ---------------------------------------------------
+        total = len(view)
+        page_sizes = [100, 250, 500, 1000, 2500]
+        pc1, pc2, pc3 = st.columns([1, 1, 2])
+        with pc1:
+            page_size = st.selectbox(
+                "Rows per page", page_sizes, index=2, key='ev_page_size',
+                disabled=total == 0)
+        n_pages = max(1, (total + page_size - 1) // page_size)
+        with pc2:
+            page = st.number_input(
+                "Page", min_value=1, max_value=n_pages, value=1,
+                step=1, key='ev_page', disabled=total == 0)
+        start = (page - 1) * page_size
+        end = min(start + page_size, total)
+        with pc3:
+            st.caption(f"Viewing rows {start + 1:,}–{end:,} of "
+                       f"{total:,} (page {page}/{n_pages})")
+        page_view = view[show_cols].iloc[start:end]
+        st.dataframe(page_view, hide_index=True,
                      width='stretch', alt='Analyzed security events')
 
         from modules.export import export_csv
@@ -152,8 +172,10 @@ if result is not None:
                                        'session_id', 'event_type',
                                        'combined_score', 'risk_level']
                            if c in filtered.columns]
+            # Limit the selectbox to the highest-scoring 500 events, but
+            # provide a text filter so any event can be located by id.
             options = filtered.sort_values(sort_col, ascending=False,
-                                           na_position='last').head(200)
+                                           na_position='last').head(500)
             labels = {
                 idx: " | ".join(str(options.loc[idx, c])
                                for c in detail_cols[:4])

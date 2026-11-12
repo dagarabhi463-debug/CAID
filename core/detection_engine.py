@@ -947,9 +947,13 @@ class DetectionEngine:
                     raw_score_col = cand
                     break
         
-        # Process each event, honoring the configured column names
+        # Process each event, honoring the configured column names.
+        # to_dict('records') + RowView avoids the per-row Series
+        # materialization cost of iterrows() (hot-path optimization).
+        from utils.row_view import RowView
         detection_results = []
-        for _, row in df.iterrows():
+        for rec in df.to_dict('records'):
+            row = RowView(rec)
             ml_payload = {}
             if ml_column in row.index:
                 ml_payload['is_anomaly'] = row.get(ml_column)

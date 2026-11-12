@@ -22,14 +22,33 @@ _EVENT_FACT_FIELDS = [
     'role', 'auth_result', 'is_anomaly', 'anomaly_score_normalized',
     'anomaly_score', 'behavioral_deviation_score', 'sequence_deviation',
     'combined_score', 'risk_level', 'operating_mode', 'detection_id',
+    'event_id',
 ]
 
 _INJECTION_PATTERNS = [
-    r'ignore\s+(all\s+)?(previous|prior|above)\s+instructions',
+    r'ignore\s+(all\s+|any\s+|the\s+)?(previous|prior|above|earlier|'
+    r'preceding|foregoing)\s+\w*\s*(instructions?|rules?|prompts?|'
+    r'directives?|context)',
     r'\b(system|assistant|user)\s*:',
-    r'<\|?(system|im_start|im_end|endoftext)\|?>',
+    r'<\|?(system|im_start|im_end|endoftext|assistant)\|?>',
     r'\[/?INST\]',
-    r'disregard\s+(your|all)\s+(rules|instructions)',
+    r'disregard\s+(your|all|the|any)\s+(rules?|instructions?|'
+    r'directives?|guidelines?)',
+    r'\byou\s+are\s+now\b',
+    r'\bfrom\s+now\s+on\b.{0,40}\b(you\s+are|act|behave|respond)',
+    r'\bnew\s+(system\s+)?instructions?\b',
+    r'\boverride\s+(your|all|the|any|previous)\b',
+    r'\bjailbreak\b',
+    r'\bdo\s+anything\s+now\b',
+    r'\bDAN\s+mode\b',
+    r'\breveal\s+(the\s+|your\s+)?(system\s+|hidden\s+|initial\s+)?'
+    r'(prompt|instructions?|directives?)\b',
+    r'\b(show|print|output|repeat|display)\s+(me\s+)?(the\s+|your\s+)?'
+    r'(system\s+|hidden\s+|initial\s+)?(prompt|instructions?)\b',
+    r'\bpretend\s+(you\s+are|to\s+be|that)\b',
+    r'\bact\s+as\s+(a|an|if|though|the)\b',
+    r'\bforget\s+(everything|all|your|previous)\b',
+    r'\bno\s+longer\s+(bound|restricted|limited)\b',
 ]
 _INJECTION_RE = re.compile('|'.join(_INJECTION_PATTERNS), re.IGNORECASE)
 
@@ -55,8 +74,22 @@ def sanitize_for_prompt(value, max_len: int = 500) -> str:
     text = ''.join(ch for ch in text if ch == '\n' or ch == '\t'
                    or ord(ch) >= 32)
     text = _INJECTION_RE.sub('[filtered]', text)
+    # Delimiter-breakout hardening: untrusted content must never be able
+    # to forge the <<UNTRUSTED_DATA>>/...<<END_UNTRUSTED_DATA>> markers
+    # (or the legacy <<DATA>> markers) that wrap_untrusted relies on.
+    text = re.sub(r'<<.*?>>', '[delimiter]', text)
+    text = re.sub(r'UNTRUSTED_DATA|END_UNTRUSTED_DATA', '[tag]', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text[:max_len]
+
+
+def detect_injection_attempt(text: str) -> bool:
+    """True when ``text`` contains a known prompt-injection pattern.
+
+    Used to flag (not block) analyst-supplied questions so callers can
+    surface a warning alongside the sanitized, still-answered request.
+    """
+    return bool(_INJECTION_RE.search(str(text or '')))
 
 
 def wrap_untrusted(label: str, content: str) -> str:
@@ -71,14 +104,24 @@ def _row_facts(row: pd.Series) -> Dict:
         if col not in row.index:
             continue
         val = row[col]
-        if pd.isna(val):
-            continue
+        if not isinstance(val, (list, tuple, set, dict)):
+            try:
+                if pd.isna(val):
+                    continue
+            except (TypeError, ValueError):
+                pass
         if hasattr(val, 'item'):
             try:
                 val = val.item()
             except Exception:
                 pass
         facts[col] = sanitize_for_prompt(val, 200)
+    # Guaranteed traceable reference even when detection_id is absent.
+    ref = row.get('detection_id') or row.get('event_id')
+    if ref is None or (isinstance(ref, float) and pd.isna(ref)):
+        ref = f"row_{row.name}" if row.name is not None else ''
+    if ref not in (None, ''):
+        facts['event_ref'] = sanitize_for_prompt(ref, 120)
     return facts
 
 
@@ -259,6 +302,9 @@ def attack_chain_context(incident: Dict,
         if event_count:
             evidence.append(
                 f"Matched {event_count} scored events for incident entities.")
+            if 'combined_score' in sub.columns:
+                sub = sub.assign(combined_score=pd.to_numeric(
+                    sub['combined_score'], errors='coerce'))
             top = sub.sort_values(
                 'combined_score' if 'combined_score' in sub.columns
                 else sub.columns[0], ascending=False).head(8)
@@ -498,9 +544,17 @@ def match_threat_hunt(question: str) -> Optional[Dict]:
     q = (question or '').lower()
     if not q.strip():
         return None
+
+    def _kw_hit(kw: str) -> bool:
+        # Short keywords (e.g. 'ip') need word boundaries so they don't
+        # match inside unrelated words; longer ones use substring match.
+        if len(kw) <= 3:
+            return re.search(r'\b' + re.escape(kw) + r'\b', q) is not None
+        return kw in q
+
     best, best_score = None, 0
     for spec in THREAT_HUNT_QUERIES:
-        score = sum(1 for kw in spec['keywords'] if kw in q)
+        score = sum(1 for kw in spec['keywords'] if _kw_hit(kw))
         if score > best_score:
             best, best_score = spec, score
     return best if best_score > 0 else None

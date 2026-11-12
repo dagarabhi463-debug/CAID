@@ -12,6 +12,7 @@ from typing import Dict
 
 import pandas as pd
 import streamlit as st
+from utils.errors import safe_error_message
 
 from modules.session_intelligence import analyze_session_intelligence
 from modules.scenario_data import (
@@ -73,7 +74,7 @@ def render_correlation_page() -> None:
                 st.success("Cross-session correlation complete.")
                 st.rerun()
             except Exception as e:
-                st.error(f"Correlation analysis failed: {e}")
+                st.error(safe_error_message(e, "Correlation analysis failed"))
                 return
         return
 

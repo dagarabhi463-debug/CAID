@@ -26247,7 +26247,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.53",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.53 across 2 sessions: user_8326, user_9883; max combined_score on this IP: 0.509"
+              "explanation": "2 users share source IP 198.51.100.53 across 2 sessions: user_8326, user_9883; max combined_score on this IP: 0.522"
             },
             {
               "signal": "corroborating_signal",
@@ -26272,7 +26272,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T22:53:24.584949+00:00",
-      "updated_at": "2026-11-12T05:04:27.505089+00:00",
+      "updated_at": "2026-11-12T07:16:31.889758+00:00",
       "source": "auto"
     },
     {
@@ -52153,9 +52153,15 @@
       ],
       "entity_sessions": [],
       "entity_ips": [],
-      "notes": [],
+      "notes": [
+        {
+          "timestamp": "2026-11-12T05:42:28.894190+00:00",
+          "author": "ai-analyst",
+          "text": "[AI analyst summary]\nCritical severity incident with 833 findings of similar account behavior across 42 accounts.\n- The incident involves 42 user accounts.\n- The users affected are user_1022, user_1203, user_1211, user_1229, user_1669, user_1958, user_2038, user_2326, user_2581, user_2666, user_2766, user_2820, user_3161, user_3163, user_3243, user_3409, user_3650, user_3725, user_4510, user_4622, user_4763, user_5041, user_5521, user_5544, user_5663, us\n- All 833 findings are of type similar_account_behavior.\n- The score for each finding is 0.93.\n- The incident is still Open with Critical severity.\n- HYPOTHESIS: The high number of similar account behavior findings may indicate a compromised account or a coordinated attack.\n- HYPOTHESIS: Further analysis is required to determine the root cause of the incident."
+        }
+      ],
       "created_at": "2026-11-11T23:40:41.757200+00:00",
-      "updated_at": "2026-11-12T05:04:25.121268+00:00",
+      "updated_at": "2026-11-12T07:16:30.839377+00:00",
       "source": "auto"
     },
     {
@@ -52189,7 +52195,7 @@
               "signal": "shared_source_ip",
               "observed_value": "203.0.113.237",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "3 users share source IP 203.0.113.237 across 3 sessions: user_2666, user_2909, user_3725; max combined_score on this IP: 0.687"
+              "explanation": "3 users share source IP 203.0.113.237 across 3 sessions: user_2666, user_2909, user_3725; max combined_score on this IP: 0.724"
             },
             {
               "signal": "corroborating_signal",
@@ -52216,7 +52222,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:41.828191+00:00",
-      "updated_at": "2026-11-12T05:04:25.340952+00:00",
+      "updated_at": "2026-11-12T07:16:30.938839+00:00",
       "source": "auto"
     },
     {
@@ -52248,7 +52254,7 @@
               "signal": "shared_source_ip",
               "observed_value": "203.0.113.179",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 203.0.113.179 across 2 sessions: user_5521, user_8777; max combined_score on this IP: 0.729"
+              "explanation": "2 users share source IP 203.0.113.179 across 2 sessions: user_5521, user_8777; max combined_score on this IP: 0.747"
             },
             {
               "signal": "corroborating_signal",
@@ -52273,7 +52279,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:41.906054+00:00",
-      "updated_at": "2026-11-12T05:04:25.527736+00:00",
+      "updated_at": "2026-11-12T07:16:31.034912+00:00",
       "source": "auto"
     },
     {
@@ -52305,7 +52311,7 @@
               "signal": "shared_source_ip",
               "observed_value": "203.0.113.204",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 203.0.113.204 across 2 sessions: user_2766, user_4622; max combined_score on this IP: 0.723"
+              "explanation": "2 users share source IP 203.0.113.204 across 2 sessions: user_2766, user_4622; max combined_score on this IP: 0.746"
             },
             {
               "signal": "corroborating_signal",
@@ -52330,7 +52336,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:41.986176+00:00",
-      "updated_at": "2026-11-12T05:04:25.695755+00:00",
+      "updated_at": "2026-11-12T07:16:31.129629+00:00",
       "source": "auto"
     },
     {
@@ -52364,7 +52370,7 @@
               "signal": "shared_source_ip",
               "observed_value": "203.0.113.118",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "3 users share source IP 203.0.113.118 across 3 sessions: user_2820, user_3650, user_7119; max combined_score on this IP: 0.745"
+              "explanation": "3 users share source IP 203.0.113.118 across 3 sessions: user_2820, user_3650, user_7119; max combined_score on this IP: 0.756"
             },
             {
               "signal": "corroborating_signal",
@@ -52391,7 +52397,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:42.065454+00:00",
-      "updated_at": "2026-11-12T05:04:25.865011+00:00",
+      "updated_at": "2026-11-12T07:16:31.245340+00:00",
       "source": "auto"
     },
     {
@@ -52423,7 +52429,7 @@
               "signal": "shared_source_ip",
               "observed_value": "203.0.113.90",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 203.0.113.90 across 2 sessions: user_5544, user_5663; max combined_score on this IP: 0.695"
+              "explanation": "2 users share source IP 203.0.113.90 across 2 sessions: user_5544, user_5663; max combined_score on this IP: 0.726"
             },
             {
               "signal": "corroborating_signal",
@@ -52448,7 +52454,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:42.151408+00:00",
-      "updated_at": "2026-11-12T05:04:26.019452+00:00",
+      "updated_at": "2026-11-12T07:16:31.371455+00:00",
       "source": "auto"
     },
     {
@@ -52480,7 +52486,7 @@
               "signal": "shared_source_ip",
               "observed_value": "203.0.113.89",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 203.0.113.89 across 2 sessions: user_2038, user_3163; max combined_score on this IP: 0.684"
+              "explanation": "2 users share source IP 203.0.113.89 across 2 sessions: user_2038, user_3163; max combined_score on this IP: 0.723"
             },
             {
               "signal": "corroborating_signal",
@@ -52505,7 +52511,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:42.280638+00:00",
-      "updated_at": "2026-11-12T05:04:26.196165+00:00",
+      "updated_at": "2026-11-12T07:16:31.483986+00:00",
       "source": "auto"
     },
     {
@@ -52541,7 +52547,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.99",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "4 users share source IP 192.0.2.99 across 4 sessions: user_1111, user_4921, user_5728, user_9856; max combined_score on this IP: 0.131"
+              "explanation": "4 users share source IP 192.0.2.99 across 4 sessions: user_1111, user_4921, user_5728, user_9856; max combined_score on this IP: 0.026"
             },
             {
               "signal": "corroborating_signal",
@@ -52570,7 +52576,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:42.390516+00:00",
-      "updated_at": "2026-11-12T05:04:27.335735+00:00",
+      "updated_at": "2026-11-12T07:16:31.783167+00:00",
       "source": "auto"
     },
     {
@@ -52602,7 +52608,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.78",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 192.0.2.78 across 2 sessions: user_2655, user_3161; max combined_score on this IP: 0.078"
+              "explanation": "2 users share source IP 192.0.2.78 across 2 sessions: user_2655, user_3161; max combined_score on this IP: 0.016"
             },
             {
               "signal": "corroborating_signal",
@@ -52627,7 +52633,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:42.581915+00:00",
-      "updated_at": "2026-11-12T05:04:28.696493+00:00",
+      "updated_at": "2026-11-12T07:16:32.769274+00:00",
       "source": "auto"
     },
     {
@@ -52659,7 +52665,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.176",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 192.0.2.176 across 2 sessions: user_7580, user_9054; max combined_score on this IP: 0.122"
+              "explanation": "2 users share source IP 192.0.2.176 across 2 sessions: user_7580, user_9054; max combined_score on this IP: 0.024"
             },
             {
               "signal": "corroborating_signal",
@@ -52684,7 +52690,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-11T23:40:42.694343+00:00",
-      "updated_at": "2026-11-12T05:04:30.435265+00:00",
+      "updated_at": "2026-11-12T07:16:33.659726+00:00",
       "source": "auto"
     },
     {
@@ -52784,7 +52790,7 @@
       "entity_ips": [],
       "notes": [],
       "created_at": "2026-11-12T00:45:24.100607+00:00",
-      "updated_at": "2026-11-12T04:27:25.390477+00:00",
+      "updated_at": "2026-11-12T15:26:20.914474+00:00",
       "source": "auto"
     },
     {
@@ -52926,12 +52932,12 @@
             "prof_kessler"
           ],
           "sessions": [],
-          "correlation_score": 0.9546,
+          "correlation_score": 0.9541,
           "shared_ip_only": false,
           "evidence": [
             {
               "signal": "behavioral_profile_similarity",
-              "observed_value": 0.9941,
+              "observed_value": 0.9934,
               "expected_baseline_or_threshold": ">= 0.8",
               "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and prof_kessler"
             },
@@ -52988,12 +52994,12 @@
             "ring_alice"
           ],
           "sessions": [],
-          "correlation_score": 0.9336,
+          "correlation_score": 0.9472,
           "shared_ip_only": false,
           "evidence": [
             {
               "signal": "behavioral_profile_similarity",
-              "observed_value": 0.9374,
+              "observed_value": 0.9524,
               "expected_baseline_or_threshold": ">= 0.8",
               "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and ring_alice"
             },
@@ -53093,6 +53099,37 @@
               "signal": "shared_triggered_patterns",
               "observed_value": [
                 "export_after_broad_access"
+              ],
+              "expected_baseline_or_threshold": ">= 1",
+              "explanation": "Both accounts triggered the same sequence patterns"
+            }
+          ],
+          "operating_note": ""
+        },
+        {
+          "correlation_id": "corr_90a0dce22626",
+          "correlation_type": "similar_account_behavior",
+          "entity_a": "drifting_sam",
+          "entity_b": "ring_bob",
+          "entities": [
+            "drifting_sam",
+            "ring_bob"
+          ],
+          "sessions": [],
+          "correlation_score": 0.9172,
+          "shared_ip_only": false,
+          "evidence": [
+            {
+              "signal": "behavioral_profile_similarity",
+              "observed_value": 0.9524,
+              "expected_baseline_or_threshold": ">= 0.8",
+              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and ring_bob"
+            },
+            {
+              "signal": "shared_triggered_patterns",
+              "observed_value": [
+                "export_after_broad_access",
+                "login_failure_burst_then_access"
               ],
               "expected_baseline_or_threshold": ">= 1",
               "explanation": "Both accounts triggered the same sequence patterns"
@@ -53217,37 +53254,6 @@
               "observed_value": [
                 "export_after_broad_access",
                 "sensitive_operation_burst"
-              ],
-              "expected_baseline_or_threshold": ">= 1",
-              "explanation": "Both accounts triggered the same sequence patterns"
-            }
-          ],
-          "operating_note": ""
-        },
-        {
-          "correlation_id": "corr_90a0dce22626",
-          "correlation_type": "similar_account_behavior",
-          "entity_a": "drifting_sam",
-          "entity_b": "ring_bob",
-          "entities": [
-            "drifting_sam",
-            "ring_bob"
-          ],
-          "sessions": [],
-          "correlation_score": 0.9036,
-          "shared_ip_only": false,
-          "evidence": [
-            {
-              "signal": "behavioral_profile_similarity",
-              "observed_value": 0.9374,
-              "expected_baseline_or_threshold": ">= 0.8",
-              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and ring_bob"
-            },
-            {
-              "signal": "shared_triggered_patterns",
-              "observed_value": [
-                "export_after_broad_access",
-                "login_failure_burst_then_access"
               ],
               "expected_baseline_or_threshold": ">= 1",
               "explanation": "Both accounts triggered the same sequence patterns"
@@ -53529,6 +53535,99 @@
           "operating_note": ""
         },
         {
+          "correlation_id": "corr_91f1a806a7f5",
+          "correlation_type": "similar_account_behavior",
+          "entity_a": "drifting_sam",
+          "entity_b": "lab_01",
+          "entities": [
+            "drifting_sam",
+            "lab_01"
+          ],
+          "sessions": [],
+          "correlation_score": 0.8715,
+          "shared_ip_only": false,
+          "evidence": [
+            {
+              "signal": "behavioral_profile_similarity",
+              "observed_value": 0.9016,
+              "expected_baseline_or_threshold": ">= 0.8",
+              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_01"
+            },
+            {
+              "signal": "shared_triggered_patterns",
+              "observed_value": [
+                "export_after_broad_access",
+                "sensitive_operation_burst"
+              ],
+              "expected_baseline_or_threshold": ">= 1",
+              "explanation": "Both accounts triggered the same sequence patterns"
+            }
+          ],
+          "operating_note": ""
+        },
+        {
+          "correlation_id": "corr_d1ac7ba7f11e",
+          "correlation_type": "similar_account_behavior",
+          "entity_a": "drifting_sam",
+          "entity_b": "lab_02",
+          "entities": [
+            "drifting_sam",
+            "lab_02"
+          ],
+          "sessions": [],
+          "correlation_score": 0.8703,
+          "shared_ip_only": false,
+          "evidence": [
+            {
+              "signal": "behavioral_profile_similarity",
+              "observed_value": 0.9003,
+              "expected_baseline_or_threshold": ">= 0.8",
+              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_02"
+            },
+            {
+              "signal": "shared_triggered_patterns",
+              "observed_value": [
+                "export_after_broad_access",
+                "sensitive_operation_burst"
+              ],
+              "expected_baseline_or_threshold": ">= 1",
+              "explanation": "Both accounts triggered the same sequence patterns"
+            }
+          ],
+          "operating_note": ""
+        },
+        {
+          "correlation_id": "corr_26dc3b8ea013",
+          "correlation_type": "similar_account_behavior",
+          "entity_a": "drifting_sam",
+          "entity_b": "lab_00",
+          "entities": [
+            "drifting_sam",
+            "lab_00"
+          ],
+          "sessions": [],
+          "correlation_score": 0.8697,
+          "shared_ip_only": false,
+          "evidence": [
+            {
+              "signal": "behavioral_profile_similarity",
+              "observed_value": 0.8997,
+              "expected_baseline_or_threshold": ">= 0.8",
+              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_00"
+            },
+            {
+              "signal": "shared_triggered_patterns",
+              "observed_value": [
+                "export_after_broad_access",
+                "sensitive_operation_burst"
+              ],
+              "expected_baseline_or_threshold": ">= 1",
+              "explanation": "Both accounts triggered the same sequence patterns"
+            }
+          ],
+          "operating_note": ""
+        },
+        {
           "correlation_id": "corr_4a9ff4de7c4a",
           "correlation_type": "similar_account_behavior",
           "entity_a": "lab_03",
@@ -53559,99 +53658,6 @@
           "operating_note": ""
         },
         {
-          "correlation_id": "corr_91f1a806a7f5",
-          "correlation_type": "similar_account_behavior",
-          "entity_a": "drifting_sam",
-          "entity_b": "lab_01",
-          "entities": [
-            "drifting_sam",
-            "lab_01"
-          ],
-          "sessions": [],
-          "correlation_score": 0.8627,
-          "shared_ip_only": false,
-          "evidence": [
-            {
-              "signal": "behavioral_profile_similarity",
-              "observed_value": 0.8918,
-              "expected_baseline_or_threshold": ">= 0.8",
-              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_01"
-            },
-            {
-              "signal": "shared_triggered_patterns",
-              "observed_value": [
-                "export_after_broad_access",
-                "sensitive_operation_burst"
-              ],
-              "expected_baseline_or_threshold": ">= 1",
-              "explanation": "Both accounts triggered the same sequence patterns"
-            }
-          ],
-          "operating_note": ""
-        },
-        {
-          "correlation_id": "corr_26dc3b8ea013",
-          "correlation_type": "similar_account_behavior",
-          "entity_a": "drifting_sam",
-          "entity_b": "lab_00",
-          "entities": [
-            "drifting_sam",
-            "lab_00"
-          ],
-          "sessions": [],
-          "correlation_score": 0.8596,
-          "shared_ip_only": false,
-          "evidence": [
-            {
-              "signal": "behavioral_profile_similarity",
-              "observed_value": 0.8884,
-              "expected_baseline_or_threshold": ">= 0.8",
-              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_00"
-            },
-            {
-              "signal": "shared_triggered_patterns",
-              "observed_value": [
-                "export_after_broad_access",
-                "sensitive_operation_burst"
-              ],
-              "expected_baseline_or_threshold": ">= 1",
-              "explanation": "Both accounts triggered the same sequence patterns"
-            }
-          ],
-          "operating_note": ""
-        },
-        {
-          "correlation_id": "corr_d1ac7ba7f11e",
-          "correlation_type": "similar_account_behavior",
-          "entity_a": "drifting_sam",
-          "entity_b": "lab_02",
-          "entities": [
-            "drifting_sam",
-            "lab_02"
-          ],
-          "sessions": [],
-          "correlation_score": 0.8596,
-          "shared_ip_only": false,
-          "evidence": [
-            {
-              "signal": "behavioral_profile_similarity",
-              "observed_value": 0.8884,
-              "expected_baseline_or_threshold": ">= 0.8",
-              "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_02"
-            },
-            {
-              "signal": "shared_triggered_patterns",
-              "observed_value": [
-                "export_after_broad_access",
-                "sensitive_operation_burst"
-              ],
-              "expected_baseline_or_threshold": ">= 1",
-              "explanation": "Both accounts triggered the same sequence patterns"
-            }
-          ],
-          "operating_note": ""
-        },
-        {
           "correlation_id": "corr_c020c2535939",
           "correlation_type": "similar_account_behavior",
           "entity_a": "drifting_sam",
@@ -53661,12 +53667,12 @@
             "lab_03"
           ],
           "sessions": [],
-          "correlation_score": 0.8287,
+          "correlation_score": 0.8388,
           "shared_ip_only": false,
           "evidence": [
             {
               "signal": "behavioral_profile_similarity",
-              "observed_value": 0.8874,
+              "observed_value": 0.8986,
               "expected_baseline_or_threshold": ">= 0.8",
               "explanation": "Cosine similarity of aggregated behavioral profiles for drifting_sam and lab_03"
             },
@@ -53696,7 +53702,7 @@
       "entity_ips": [],
       "notes": [],
       "created_at": "2026-11-12T00:45:24.186903+00:00",
-      "updated_at": "2026-11-12T04:27:25.535930+00:00",
+      "updated_at": "2026-11-12T15:26:21.042310+00:00",
       "source": "auto"
     },
     {
@@ -54079,7 +54085,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.200",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "4 users share source IP 192.0.2.200 across 8 sessions: lab_00, lab_01, lab_02, lab_03; max combined_score on this IP: 0.712"
+              "explanation": "4 users share source IP 192.0.2.200 across 8 sessions: lab_00, lab_01, lab_02, lab_03; max combined_score on this IP: 0.751"
             },
             {
               "signal": "corroborating_signal",
@@ -54208,7 +54214,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T00:45:24.504838+00:00",
-      "updated_at": "2026-11-12T04:27:25.920403+00:00",
+      "updated_at": "2026-11-12T15:26:21.462991+00:00",
       "source": "auto"
     },
     {
@@ -54348,7 +54354,7 @@
       "entity_ips": [],
       "notes": [],
       "created_at": "2026-11-12T00:56:29.922513+00:00",
-      "updated_at": "2026-11-12T04:27:25.663617+00:00",
+      "updated_at": "2026-11-12T15:26:21.167545+00:00",
       "source": "auto"
     },
     {
@@ -80901,7 +80907,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:18.405707+00:00",
-      "updated_at": "2026-11-12T05:04:26.412928+00:00",
+      "updated_at": "2026-11-12T05:39:53.608065+00:00",
       "source": "auto"
     },
     {
@@ -81986,7 +81992,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.81",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "4 users share source IP 192.0.2.81 across 4 sessions: user_4328, user_6295, user_8496, user_9646; max combined_score on this IP: 0.110"
+              "explanation": "4 users share source IP 192.0.2.81 across 4 sessions: user_4328, user_6295, user_8496, user_9646; max combined_score on this IP: 0.022"
             },
             {
               "signal": "corroborating_signal",
@@ -82015,7 +82021,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:20.062902+00:00",
-      "updated_at": "2026-11-12T05:04:26.982046+00:00",
+      "updated_at": "2026-11-12T07:16:31.585828+00:00",
       "source": "auto"
     },
     {
@@ -82051,7 +82057,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.148",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "4 users share source IP 192.0.2.148 across 4 sessions: user_1916, user_4259, user_6761, user_9598; max combined_score on this IP: 0.066"
+              "explanation": "4 users share source IP 192.0.2.148 across 4 sessions: user_1916, user_4259, user_6761, user_9598; max combined_score on this IP: 0.013"
             },
             {
               "signal": "corroborating_signal",
@@ -82080,7 +82086,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:20.181733+00:00",
-      "updated_at": "2026-11-12T05:04:27.169298+00:00",
+      "updated_at": "2026-11-12T07:16:31.684391+00:00",
       "source": "auto"
     },
     {
@@ -83305,7 +83311,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.21",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "3 users share source IP 198.51.100.21 across 3 sessions: user_1256, user_1427, user_1519; max combined_score on this IP: 0.455"
+              "explanation": "3 users share source IP 198.51.100.21 across 3 sessions: user_1256, user_1427, user_1519; max combined_score on this IP: 0.459"
             },
             {
               "signal": "corroborating_signal",
@@ -83332,7 +83338,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:23.144705+00:00",
-      "updated_at": "2026-11-12T05:04:28.019725+00:00",
+      "updated_at": "2026-11-12T07:16:32.371955+00:00",
       "source": "auto"
     },
     {
@@ -83549,7 +83555,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.16",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "3 users share source IP 198.51.100.16 across 3 sessions: user_3089, user_5981, user_6544; max combined_score on this IP: 0.445"
+              "explanation": "3 users share source IP 198.51.100.16 across 3 sessions: user_3089, user_5981, user_6544; max combined_score on this IP: 0.457"
             },
             {
               "signal": "corroborating_signal",
@@ -83576,7 +83582,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:23.662891+00:00",
-      "updated_at": "2026-11-12T05:04:28.189472+00:00",
+      "updated_at": "2026-11-12T07:16:32.470777+00:00",
       "source": "auto"
     },
     {
@@ -83913,7 +83919,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.3",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.3 across 2 sessions: user_3056, user_7484; max combined_score on this IP: 0.414"
+              "explanation": "2 users share source IP 198.51.100.3 across 2 sessions: user_3056, user_7484; max combined_score on this IP: 0.448"
             },
             {
               "signal": "corroborating_signal",
@@ -83938,7 +83944,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:24.426923+00:00",
-      "updated_at": "2026-11-12T05:04:28.533048+00:00",
+      "updated_at": "2026-11-12T07:16:32.674021+00:00",
       "source": "auto"
     },
     {
@@ -84768,7 +84774,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.199",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.199 across 2 sessions: user_7521, user_8439; max combined_score on this IP: 0.440"
+              "explanation": "2 users share source IP 198.51.100.199 across 2 sessions: user_7521, user_8439; max combined_score on this IP: 0.487"
             },
             {
               "signal": "corroborating_signal",
@@ -84793,7 +84799,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:26.562497+00:00",
-      "updated_at": "2026-11-12T05:04:28.854613+00:00",
+      "updated_at": "2026-11-12T07:16:32.875242+00:00",
       "source": "auto"
     },
     {
@@ -85217,14 +85223,14 @@
             "timeout:user_3128:2024-02-14T09:05:54:0001",
             "timeout:user_7579:2024-02-05T00:50:11:0001"
           ],
-          "correlation_score": 0.15,
+          "correlation_score": 0.25,
           "shared_ip_only": true,
           "evidence": [
             {
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.169",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.169 across 2 sessions: user_3128, user_7579; max combined_score on this IP: 0.492"
+              "explanation": "2 users share source IP 198.51.100.169 across 2 sessions: user_3128, user_7579; max combined_score on this IP: 0.519"
             },
             {
               "signal": "corroborating_signal",
@@ -85249,7 +85255,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:27.689392+00:00",
-      "updated_at": "2026-11-12T05:04:29.030676+00:00",
+      "updated_at": "2026-11-12T07:16:31.997071+00:00",
       "source": "auto"
     },
     {
@@ -85281,7 +85287,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.88",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.88 across 2 sessions: user_4695, user_9640; max combined_score on this IP: 0.415"
+              "explanation": "2 users share source IP 198.51.100.88 across 2 sessions: user_4695, user_9640; max combined_score on this IP: 0.408"
             },
             {
               "signal": "corroborating_signal",
@@ -85306,7 +85312,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:27.824064+00:00",
-      "updated_at": "2026-11-12T05:04:29.228607+00:00",
+      "updated_at": "2026-11-12T07:16:32.988636+00:00",
       "source": "auto"
     },
     {
@@ -85395,7 +85401,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.97",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.97 across 2 sessions: user_3315, user_9939; max combined_score on this IP: 0.420"
+              "explanation": "2 users share source IP 198.51.100.97 across 2 sessions: user_3315, user_9939; max combined_score on this IP: 0.406"
             },
             {
               "signal": "corroborating_signal",
@@ -85420,7 +85426,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:28.099180+00:00",
-      "updated_at": "2026-11-12T05:04:29.404894+00:00",
+      "updated_at": "2026-11-12T07:16:33.092757+00:00",
       "source": "auto"
     },
     {
@@ -85509,7 +85515,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.116",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.116 across 2 sessions: user_1630, user_2823; max combined_score on this IP: 0.423"
+              "explanation": "2 users share source IP 198.51.100.116 across 2 sessions: user_1630, user_2823; max combined_score on this IP: 0.393"
             },
             {
               "signal": "corroborating_signal",
@@ -85534,7 +85540,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:28.414161+00:00",
-      "updated_at": "2026-11-12T05:04:29.579458+00:00",
+      "updated_at": "2026-11-12T07:16:33.197687+00:00",
       "source": "auto"
     },
     {
@@ -85794,7 +85800,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.182",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.182 across 2 sessions: user_3947, user_6050; max combined_score on this IP: 0.406"
+              "explanation": "2 users share source IP 198.51.100.182 across 2 sessions: user_3947, user_6050; max combined_score on this IP: 0.391"
             },
             {
               "signal": "corroborating_signal",
@@ -85819,7 +85825,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:29.032478+00:00",
-      "updated_at": "2026-11-12T05:04:29.780696+00:00",
+      "updated_at": "2026-11-12T07:16:33.343878+00:00",
       "source": "auto"
     },
     {
@@ -85851,7 +85857,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.152",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.152 across 2 sessions: user_4855, user_8972; max combined_score on this IP: 0.431"
+              "explanation": "2 users share source IP 198.51.100.152 across 2 sessions: user_4855, user_8972; max combined_score on this IP: 0.434"
             },
             {
               "signal": "corroborating_signal",
@@ -85876,7 +85882,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:29.174015+00:00",
-      "updated_at": "2026-11-12T05:04:30.000628+00:00",
+      "updated_at": "2026-11-12T07:16:33.459919+00:00",
       "source": "auto"
     },
     {
@@ -85908,7 +85914,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.186",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.186 across 2 sessions: user_4562, user_6592; max combined_score on this IP: 0.404"
+              "explanation": "2 users share source IP 198.51.100.186 across 2 sessions: user_4562, user_6592; max combined_score on this IP: 0.398"
             },
             {
               "signal": "corroborating_signal",
@@ -85933,7 +85939,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T02:58:29.367042+00:00",
-      "updated_at": "2026-11-12T05:04:30.227988+00:00",
+      "updated_at": "2026-11-12T07:16:33.563163+00:00",
       "source": "auto"
     },
     {
@@ -86944,7 +86950,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T04:08:38.505142+00:00",
-      "updated_at": "2026-11-12T05:04:26.585490+00:00",
+      "updated_at": "2026-11-12T05:39:53.721773+00:00",
       "source": "auto"
     },
     {
@@ -87053,7 +87059,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T04:08:38.755380+00:00",
-      "updated_at": "2026-11-12T05:04:26.773932+00:00",
+      "updated_at": "2026-11-12T05:39:53.831193+00:00",
       "source": "auto"
     },
     {
@@ -87118,7 +87124,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T04:08:39.978685+00:00",
-      "updated_at": "2026-11-12T05:04:27.662617+00:00",
+      "updated_at": "2026-11-12T05:39:54.403637+00:00",
       "source": "auto"
     },
     {
@@ -87152,7 +87158,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.20",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "3 users share source IP 192.0.2.20 across 3 sessions: user_3906, user_6425, user_7146; max combined_score on this IP: 0.084"
+              "explanation": "3 users share source IP 192.0.2.20 across 3 sessions: user_3906, user_6425, user_7146; max combined_score on this IP: 0.017"
             },
             {
               "signal": "corroborating_signal",
@@ -87179,7 +87185,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T04:08:40.179180+00:00",
-      "updated_at": "2026-11-12T05:04:27.836340+00:00",
+      "updated_at": "2026-11-12T07:16:32.234257+00:00",
       "source": "auto"
     },
     {
@@ -87213,7 +87219,7 @@
               "signal": "shared_source_ip",
               "observed_value": "192.0.2.181",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "3 users share source IP 192.0.2.181 across 3 sessions: user_3420, user_3826, user_8239; max combined_score on this IP: 0.137"
+              "explanation": "3 users share source IP 192.0.2.181 across 3 sessions: user_3420, user_3826, user_8239; max combined_score on this IP: 0.027"
             },
             {
               "signal": "corroborating_signal",
@@ -87240,7 +87246,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T04:08:40.812432+00:00",
-      "updated_at": "2026-11-12T05:04:28.373278+00:00",
+      "updated_at": "2026-11-12T07:16:32.569853+00:00",
       "source": "auto"
     },
     {
@@ -87321,7 +87327,7 @@
               "signal": "shared_source_ip",
               "observed_value": "198.51.100.88",
               "expected_baseline_or_threshold": ">= 2 distinct users",
-              "explanation": "2 users share source IP 198.51.100.88 across 4 sessions: ring_alice, ring_bob; max combined_score on this IP: 0.757"
+              "explanation": "2 users share source IP 198.51.100.88 across 4 sessions: ring_alice, ring_bob; max combined_score on this IP: 0.797"
             },
             {
               "signal": "corroborating_signal",
@@ -87420,7 +87426,7 @@
       ],
       "notes": [],
       "created_at": "2026-11-12T04:27:25.785491+00:00",
-      "updated_at": "2026-11-12T04:27:25.785491+00:00",
+      "updated_at": "2026-11-12T15:26:21.338924+00:00",
       "source": "auto"
     },
     {
@@ -87562,6 +87568,67 @@
       "notes": [],
       "created_at": "2026-11-12T04:27:26.400002+00:00",
       "updated_at": "2026-11-12T04:27:26.400002+00:00",
+      "source": "auto"
+    },
+    {
+      "incident_id": "inc_751cccfa782c",
+      "title": "1 correlated findings across 3 accounts (user_2169, user_5105, user_8702)",
+      "status": "Open",
+      "severity": "Low",
+      "finding_ids": [
+        "corr_317372f89bef"
+      ],
+      "findings": [
+        {
+          "correlation_id": "corr_317372f89bef",
+          "correlation_type": "shared_ip_activity",
+          "entity_a": "user_2169",
+          "entity_b": "user_5105",
+          "entities": [
+            "user_2169",
+            "user_5105",
+            "user_8702"
+          ],
+          "sessions": [
+            "timeout:user_2169:2024-01-21T18:17:44:0001",
+            "timeout:user_5105:2024-02-12T12:54:05:0001",
+            "timeout:user_8702:2024-02-01T08:24:55:0001"
+          ],
+          "correlation_score": 0.2,
+          "shared_ip_only": true,
+          "evidence": [
+            {
+              "signal": "shared_source_ip",
+              "observed_value": "192.0.2.163",
+              "expected_baseline_or_threshold": ">= 2 distinct users",
+              "explanation": "3 users share source IP 192.0.2.163 across 3 sessions: user_2169, user_5105, user_8702; max combined_score on this IP: 0.040"
+            },
+            {
+              "signal": "corroborating_signal",
+              "observed_value": 0,
+              "expected_baseline_or_threshold": ">= 1 user pair(s)",
+              "explanation": "No independent correlation links these accounts; shared IP may reflect NAT, labs, or coincidental access"
+            }
+          ],
+          "operating_note": "Shared IP only \u2014 insufficient evidence of coordination"
+        }
+      ],
+      "entity_users": [
+        "user_2169",
+        "user_5105",
+        "user_8702"
+      ],
+      "entity_sessions": [
+        "timeout:user_2169:2024-01-21T18:17:44:0001",
+        "timeout:user_5105:2024-02-12T12:54:05:0001",
+        "timeout:user_8702:2024-02-01T08:24:55:0001"
+      ],
+      "entity_ips": [
+        "192.0.2.163"
+      ],
+      "notes": [],
+      "created_at": "2026-11-12T05:53:54.827302+00:00",
+      "updated_at": "2026-11-12T07:16:32.103284+00:00",
       "source": "auto"
     }
   ]

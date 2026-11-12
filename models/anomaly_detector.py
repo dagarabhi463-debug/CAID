@@ -256,6 +256,12 @@ class AnomalyDetector:
             'score_calibration': self._score_calibration,
             'extra_state': getattr(self, '_extra_artifact_state', {}),
         }, model_path)
+        # Integrity sidecar: tampering/corruption is detected at load.
+        try:
+            from core.artifact_integrity import write_checksum
+            write_checksum(model_path)
+        except Exception:
+            pass
     
     def load(self, model_path: str) -> 'AnomalyDetector':
         """
@@ -272,7 +278,18 @@ class AnomalyDetector:
         """
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found: {model_path}")
-        
+
+        # Integrity check: a present .sha256 sidecar must match. Mismatch
+        # raises -> ensure_* helpers quarantine + refit on designated data.
+        try:
+            from core.artifact_integrity import verify_checksum
+            if not verify_checksum(model_path):
+                raise ValueError(
+                    f"Model artifact checksum mismatch at {model_path}: "
+                    f"file may be tampered or corrupted")
+        except ImportError:
+            pass
+
         saved_data = joblib.load(model_path)
         
         # Validate artifact schema and version before restoring state

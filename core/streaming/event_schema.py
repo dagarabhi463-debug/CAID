@@ -122,6 +122,10 @@ class StreamingEvent:
     ordering_key: Tuple = field(default=None, repr=False)
     # Lineage for replayed events
     replay_of: str = ''
+    # Lazily-populated cache for log_dict() (hot-path dedup: the same
+    # dict feeds assign/prefix/dup hashes and row assembly).
+    _log_dict_cache: Optional[Dict[str, object]] = field(
+        default=None, repr=False, compare=False)
 
     def to_log_dict(self) -> Dict[str, object]:
         """Log-schema fields only — the shape detectors consume."""
@@ -141,6 +145,13 @@ class StreamingEvent:
             'auth_result': self.auth_result,
         }
         return out
+
+    def log_dict(self) -> Dict[str, object]:
+        """Cached ``to_log_dict()`` — identical content, computed once
+        per event (the tracker hashes the same fields 3-4x per event)."""
+        if self._log_dict_cache is None:
+            self._log_dict_cache = self.to_log_dict()
+        return self._log_dict_cache
 
     def to_dict(self) -> Dict[str, object]:
         out = self.to_log_dict()
@@ -215,6 +226,148 @@ class BoundedDedupLRU:
         self._seen = OrderedDict()
         for key in list(keys or [])[-self.maxsize:]:
             self._seen[str(key)] = None
+
+
+class JsonlDedupStore:
+    """Append-only JSONL-backed dedup store — restart-persistent variant
+    of ``BoundedDedupLRU``.
+
+    Every accepted ``event_id`` is appended to ``path`` (one JSON object
+    per line: ``{"event_id": ..., "seen_at_utc": ...}``) and fsynced, so
+    a process restart cannot re-admit already-seen events. On open, the
+    most recent ``maxsize`` ids are reloaded into the in-memory LRU.
+
+    The backing file is compacted in place once it grows beyond
+    ``compact_after`` lines, keeping only the live LRU keys — bounded
+    disk usage without losing dedup coverage within the window.
+    """
+
+    def __init__(self, path: str, maxsize: int = 100_000,
+                 compact_after: int = 400_000):
+        import os
+        import threading
+        self.path = path
+        self.maxsize = int(maxsize)
+        self.compact_after = int(compact_after)
+        self._seen: OrderedDict[str, None] = OrderedDict()
+        self._appends = 0
+        self._lock = threading.Lock()
+        os.makedirs(os.path.dirname(os.path.abspath(path)),
+                    exist_ok=True)
+        self._load()
+        self._fh = open(path, 'a', encoding='utf-8')
+
+    def _load(self) -> None:
+        import os
+        if not os.path.exists(self.path):
+            return
+        tail: "OrderedDict[str, None]" = OrderedDict()
+        with open(self.path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                eid = rec.get('event_id') if isinstance(rec, dict) else None
+                if eid:
+                    tail[str(eid)] = None
+                    while len(tail) > self.maxsize:
+                        tail.popitem(last=False)
+        self._seen = tail
+        # Lines already on disk count toward the next compaction.
+        try:
+            with open(self.path, 'rb') as f:
+                self._appends = sum(1 for _ in f)
+        except OSError:
+            self._appends = len(self._seen)
+
+    def __len__(self) -> int:
+        return len(self._seen)
+
+    def __contains__(self, event_id: str) -> bool:
+        return event_id in self._seen
+
+    def check_and_add(self, event_id: str) -> bool:
+        """Return True if the event_id was already seen (duplicate)."""
+        with self._lock:
+            if event_id in self._seen:
+                self._seen.move_to_end(event_id)
+                return True
+            self._seen[event_id] = None
+            while len(self._seen) > self.maxsize:
+                self._seen.popitem(last=False)
+            try:
+                self._fh.write(json.dumps(
+                    {'event_id': event_id,
+                     'seen_at_utc': _utcnow_iso()}) + '\n')
+                self._fh.flush()
+            except (OSError, ValueError):
+                # Persistence failure must not silently widen the dedup
+                # window: keep the in-memory mark (fail-safe direction is
+                # to over-dedup within this process, never under-dedup).
+                pass
+            self._appends += 1
+            if self._appends >= self.compact_after:
+                self._compact()
+            return False
+
+    def _compact(self) -> None:
+        """Rewrite the backing file with only the live LRU keys."""
+        import os
+        try:
+            tmp = self.path + '.tmp'
+            with open(tmp, 'w', encoding='utf-8') as f:
+                for eid in self._seen:
+                    f.write(json.dumps({'event_id': eid,
+                                        'seen_at_utc': _utcnow_iso()})
+                            + '\n')
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp, self.path)
+            # Reopen the append handle against the compacted file.
+            try:
+                self._fh.close()
+            except Exception:
+                pass
+            self._fh = open(self.path, 'a', encoding='utf-8')
+            self._appends = len(self._seen)
+        except OSError:
+            # Compaction is best-effort; the append-only file remains
+            # correct (just larger) and will be retried next threshold.
+            pass
+
+    def snapshot_keys(self) -> List[str]:
+        return list(self._seen.keys())
+
+    def restore_keys(self, keys) -> None:
+        self._seen = OrderedDict()
+        for key in list(keys or [])[-self.maxsize:]:
+            self._seen[str(key)] = None
+
+    def close(self) -> None:
+        try:
+            self._fh.flush()
+            self._fh.close()
+        except Exception:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+
+def make_dedup_store(path: Optional[str] = None,
+                     maxsize: int = 100_000):
+    """Factory: persistent JSONL dedup when ``path`` is given, else the
+    in-memory ``BoundedDedupLRU`` (dev/test default)."""
+    if path:
+        return JsonlDedupStore(path, maxsize=maxsize)
+    return BoundedDedupLRU(maxsize=maxsize)
 
 
 def validate_event(raw: object, *, source: str = 'api',

@@ -13,6 +13,7 @@ import os
 
 import pandas as pd
 import streamlit as st
+from utils.errors import safe_error_message
 
 REPORTS = 'reports'
 
@@ -210,4 +211,4 @@ if st.button("Measure drift vs normal baseline", key='dq_drift'):
                 st.dataframe(pd.DataFrame(d['columns_skipped']),
                              hide_index=True, width='stretch')
     except Exception as exc:
-        st.error(f"Drift measurement failed: {exc}")
+        st.error(safe_error_message(exc, "Drift measurement failed"))

@@ -23,15 +23,24 @@ def _utcnow() -> str:
 
 
 class StreamCheckpoint:
-    """JSON metadata + pickled tracker state, atomically replaced."""
+    """JSON metadata + pickled tracker state, atomically replaced.
 
-    VERSION = 1
+    Schema versioning: ``meta['version']`` records the checkpoint schema
+    generation. ``restore_tracker`` refuses checkpoints newer than
+    ``VERSION`` (written by a newer binary — restoring them could
+    silently corrupt state) and migrates older snapshots forward through
+    ``_migrate_snapshot`` before applying them.
+    """
+
+    VERSION = 2
+    SUPPORTED_VERSIONS = (1, 2)
 
     def __init__(self, path: str):
         self.path = path
         self.state_path = path + '.state.pkl'
         self.meta: dict = {}
         self.tracker_state: Optional[bytes] = None
+        self.version: Optional[int] = None
 
     def save(self, *, queue_meta: Optional[dict] = None,
              tracker=None, artifact_fingerprints: Optional[dict] = None,
@@ -39,6 +48,7 @@ class StreamCheckpoint:
              extra: Optional[dict] = None) -> str:
         meta = {
             'version': self.VERSION,
+            'schema': 'caid-stream-checkpoint',
             'saved_utc': _utcnow(),
             'queue': queue_meta or {},
             'artifact_fingerprints': artifact_fingerprints or {},
@@ -47,11 +57,22 @@ class StreamCheckpoint:
         }
         state_blob = None
         if tracker is not None:
-            state_blob = pickle.dumps(self._tracker_snapshot(tracker),
+            snap = self._tracker_snapshot(tracker)
+            snap['schema_version'] = self.VERSION
+            state_blob = pickle.dumps(snap,
                                       protocol=pickle.HIGHEST_PROTOCOL)
         self._atomic_write_json(self.path, meta)
         if state_blob is not None:
             self._atomic_write_bytes(self.state_path, state_blob)
+        # Integrity sidecars: detect tampering/corruption of both the
+        # JSON meta and the pickled tracker state before deserializing.
+        try:
+            from core.artifact_integrity import write_checksum
+            write_checksum(self.path)
+            if state_blob is not None:
+                write_checksum(self.state_path)
+        except Exception:
+            pass
         self.meta = meta
         self.tracker_state = state_blob
         return self.path
@@ -59,12 +80,50 @@ class StreamCheckpoint:
     def load(self):
         if not os.path.exists(self.path):
             return None
+        # Integrity check: a present .sha256 sidecar must match before
+        # we trust the JSON meta (and any pickle it points at).
+        try:
+            from core.artifact_integrity import verify_checksum
+            if not verify_checksum(self.path):
+                return None
+        except ImportError:
+            pass
         with open(self.path, 'r', encoding='utf-8') as f:
             self.meta = json.load(f)
+        version = self.meta.get('version', 1)
+        try:
+            self.version = int(version)
+        except (TypeError, ValueError):
+            self.version = None
         if os.path.exists(self.state_path):
+            # Verify pickle integrity before reading bytes that will be
+            # fed to pickle.loads (tampered pickle = arbitrary code).
+            try:
+                from core.artifact_integrity import verify_checksum
+                if not verify_checksum(self.state_path):
+                    self.tracker_state = None
+                    return self.meta
+            except ImportError:
+                pass
             with open(self.state_path, 'rb') as f:
                 self.tracker_state = f.read()
         return self.meta
+
+    @staticmethod
+    def _migrate_snapshot(snap: dict, from_version: int) -> dict:
+        """Migrate a pickled tracker snapshot to the current schema.
+
+        v1 snapshots predate the explicit ``schema_version`` marker and
+        the bounded ``late_details`` traceability map; both are filled
+        with safe defaults. Ordering buffers (``_timed``/``_explicit``)
+        are intentionally NOT checkpointed — un-acked queue entries are
+        redelivered by the queue itself.
+        """
+        snap = dict(snap or {})
+        if from_version < 2:
+            snap.setdefault('late_details', {})
+            snap.setdefault('content_seen', OrderedDict())
+        return snap
 
     @staticmethod
     def _tracker_snapshot(tracker) -> dict:
@@ -91,12 +150,28 @@ class StreamCheckpoint:
         tracker.content_seen = snap.get('content_seen', OrderedDict())
 
     def restore_tracker(self, tracker) -> bool:
-        """Restore pickled tracker state onto a fresh tracker instance."""
+        """Restore pickled tracker state onto a fresh tracker instance.
+
+        Returns False (caller falls back to a clean tracker) when the
+        checkpoint is missing, unreadable, or written by a NEWER schema
+        version than this binary supports.
+        """
         self.load()
         if not self.tracker_state:
             return False
+        if (self.version is not None
+                and self.version not in self.SUPPORTED_VERSIONS):
+            return False
         try:
             snap = pickle.loads(self.tracker_state)
+            if not isinstance(snap, dict):
+                return False
+            snap_version = int(snap.get('schema_version')
+                               or self.version or 1)
+            if snap_version > self.VERSION:
+                return False
+            snap = self._migrate_snapshot(
+                snap, min(snap_version, self.VERSION))
             self._tracker_restore(tracker, snap)
             return True
         except Exception:

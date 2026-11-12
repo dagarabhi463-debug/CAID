@@ -245,9 +245,10 @@ class RiskEngine:
         if calibration_df is None or len(calibration_df) == 0:
             raise ValueError("Cannot calibrate on an empty DataFrame")
 
+        from utils.row_view import RowView
         scores = np.array([
-            self.calculate_risk_score(row)[0]
-            for _, row in calibration_df.iterrows()
+            self.calculate_risk_score(RowView(r))[0]
+            for r in calibration_df.to_dict('records')
         ], dtype=float)
         scores = scores[np.isfinite(scores)]
         if len(scores) == 0:
@@ -355,8 +356,9 @@ class RiskEngine:
 
         df = eval_df.copy()
         if 'risk_score' not in df.columns:
-            df['risk_score'] = [self.calculate_risk_score(r)[0]
-                                for _, r in df.iterrows()]
+            from utils.row_view import RowView
+            df['risk_score'] = [self.calculate_risk_score(RowView(r))[0]
+                                for r in df.to_dict('records')]
         df['risk_level'] = df['risk_score'].apply(self.classify_risk)
         df['risk_level'] = df['risk_level'].apply(
             lambda x: x.value if isinstance(x, RiskLevel) else str(x))
@@ -411,30 +413,37 @@ class RiskEngine:
         # Fit the engine to get anomaly score statistics
         self.fit(df)
         
-        # Calculate risk scores for each event
-        risk_results = df.apply(self.calculate_risk_score, axis=1)
-        
+        # Calculate risk scores for each event. to_dict('records') +
+        # RowView avoids the per-row Series cost of apply(axis=1).
+        from utils.row_view import RowView
+        records = df.to_dict('records')
+        risk_results = [self.calculate_risk_score(RowView(r))
+                        for r in records]
+
         # Extract results
         risk_scores = [r[0] for r in risk_results]
         risk_factors = [r[1] for r in risk_results]
-        
+
         # Add risk scores
         df['risk_score'] = risk_scores
         df['risk_factors'] = risk_factors
-        
+
         # Update risk_min and risk_max after scores are calculated
         self.risk_min = df['risk_score'].min()
         self.risk_max = df['risk_score'].max()
-        
+
         # Classify risk levels
         df['risk_level'] = df['risk_score'].apply(self.classify_risk)
-        
+
         # Convert RiskLevel enum to string value (e.g., "Low" instead of "RiskLevel.Low")
         df['risk_level'] = df['risk_level'].apply(lambda x: x.value if isinstance(x, RiskLevel) else str(x))
-        
+
         # Add evidence-based classification
         if len(df) > 0:
-            df['risk_evidence'] = df.apply(self._generate_evidence, axis=1)
+            df['risk_evidence'] = [
+                self._generate_evidence(RowView({**r, 'risk_factors': f}))
+                for r, f in zip(records, risk_factors)
+            ]
         else:
             df['risk_evidence'] = pd.Series(dtype=str)
         

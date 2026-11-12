@@ -578,10 +578,25 @@ class SequenceAnalyzer:
             'fit_event_count': self._fit_event_count,
             'fit_session_count': self._fit_session_count,
         }, path)
+        # Integrity sidecar: tampering/corruption is detected at load.
+        try:
+            from core.artifact_integrity import write_checksum
+            write_checksum(path)
+        except Exception:
+            pass
 
     def load(self, path: str) -> 'SequenceAnalyzer':
         if not os.path.exists(path):
             raise FileNotFoundError(f'Sequence model artifact not found: {path}')
+        # Integrity check: a present .sha256 sidecar must match.
+        try:
+            from core.artifact_integrity import verify_checksum
+            if not verify_checksum(path):
+                raise ValueError(
+                    f'Sequence artifact checksum mismatch at {path}: '
+                    f'file may be tampered or corrupted')
+        except ImportError:
+            pass
         data = joblib.load(path)
         if not isinstance(data, dict):
             raise ValueError(f'Invalid sequence artifact at {path}')

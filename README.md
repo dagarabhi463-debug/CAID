@@ -53,7 +53,13 @@ the file) before launching:
 
 - `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_TIMEOUT` — local Ollama server
 - `REDIS_URL` — Redis Streams queue for streaming ingestion (optional;
-  defaults to `redis://127.0.0.1:6379/0`)
+  defaults to `redis://127.0.0.1:6379/0`; use `rediss://` for TLS)
+- `CAID_UI_TOKEN` — optional shared access token gating the dashboard
+- `CAID_DEBUG` — set to `1` to include exception details in UI errors
+- `OLLAMA_TEMPERATURE` / `OLLAMA_SEED` / `CAID_AI_TEMPERATURE` /
+  `CAID_AI_SEED` — deterministic sampling controls for the AI analyst
+- `OLLAMA_CA_BUNDLE` / `OLLAMA_VERIFY_SSL` — TLS options for https://
+  Ollama endpoints
 
 ## Project Structure
 
@@ -66,15 +72,29 @@ web-project/
 ├── app_pages/              # Streamlit pages (13)
 ├── core/                   # Detection & analytics engine
 │   ├── detection_engine.py #   Channel-weighted fused scoring
+│   ├── detection_rules.py  #   Safe AST rule engine (compiled evaluator)
 │   ├── calibration.py      #   Fingerprint-bound threshold artifacts
 │   ├── drift_monitor.py    #   Observational distribution drift (M2.4)
+│   ├── artifact_integrity.py # SHA-256 sidecars for model artifacts
+│   ├── ui_auth.py          #   Optional CAID_UI_TOKEN access gate
+│   ├── ai_analyst.py       #   Grounded Ollama analyst (deterministic
+│   │                       #   temperature=0 default, injection flags)
+│   ├── ai_claims.py        #   Claim-level fabrication checks
+│   ├── ai_evaluation.py    #   AI reliability benchmark harness (v2)
+│   ├── summary_report.py   #   Consolidated summary reports
+│   ├── streaming/          #   Durable queue/checkpoint/DLQ/replay,
+│   │                       #   Prometheus /metrics (metrics_server.py),
+│   │                       #   persistent JSONL dedup, late-event rescore
 │   └── ...                 #   log/rules/risk/session/sequence/correlation/
-│                           #   incidents/MITRE/AI modules
+│                           #   incidents/MITRE modules
 ├── models/                 # anomaly_detector.py + saved_models/
 ├── modules/                # Streamlit UI/state layer
 ├── data/                   # raw/, processed/, scenarios, incidents, MITRE cache
-├── utils/validators.py     # CSV schema validation & cleaning
-├── scripts/                # benchmark_models.py, evaluate_fusion.py (M2.4)
+├── utils/                  # validators.py, row_view.py (hot-path rows),
+│                           # errors.py (traceback-safe UI messages)
+├── scripts/                # benchmark_models.py, evaluate_fusion.py (M2.4),
+│                           # calibrate_v2_detection.py, evaluate_ai_analyst.py,
+│                           # stream_benchmark.py, profile_streaming.py
 ├── tests/                  # pytest suite
 ├── docs/                   # audit/, architecture/, research/,
 │                           # testing/, roadmap/

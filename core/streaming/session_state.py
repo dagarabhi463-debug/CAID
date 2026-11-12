@@ -377,7 +377,7 @@ class IncrementalSessionTracker:
         but without constructing a pandas Series per call (hot path)."""
         import hashlib
         import json
-        d = event.to_log_dict()
+        d = event.log_dict()
         present = [c for c in cols if c in d]
         payload = []
         for col in present:
@@ -410,7 +410,7 @@ class IncrementalSessionTracker:
     def _dup_hash_for(self, event: StreamingEvent,
                       session_id: str) -> str:
         """Resolved-content duplicate hash (session_id included)."""
-        d = event.to_log_dict()
+        d = dict(event.log_dict())
         d['session_id'] = session_id
         present = [c for c in _DUP_HASH_COLS if c in d]
         return _content_hash(d, present)
@@ -578,7 +578,7 @@ class IncrementalSessionTracker:
         st.prev_event = event_type
 
         # --- session deviation (reuse frozen baseline scorer) -------------
-        row_for_session = dict(ev.to_log_dict())
+        row_for_session = dict(ev.log_dict())
         row_for_session.update(prefix_vals)
         session_score, session_factors, session_missing, session_scope = \
             self.baseline_manager.score_row(row_for_session)
@@ -589,7 +589,7 @@ class IncrementalSessionTracker:
             is_dup, rate, st.sensitive_count)
 
         # --- assemble emitted row -----------------------------------------
-        row = dict(ev.to_log_dict())
+        row = dict(ev.log_dict())
         # Envelope fields: identity/lineage only — never detector inputs.
         row['event_id'] = ev.event_id
         row['ingested_at_utc'] = ev.ingested_at_utc

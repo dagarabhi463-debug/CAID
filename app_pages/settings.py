@@ -4,6 +4,7 @@ import os
 import sys
 
 import streamlit as st
+from utils.errors import safe_error_message
 
 from core.ollama_client import (
     DEFAULT_BASE_URL,
@@ -78,15 +79,19 @@ if 'ollama_model' not in st.session_state:
 c1, c2 = st.columns(2)
 with c1:
     if st.button("Test connection & refresh models", key='set_ollama_test'):
-        try:
-            st.session_state.ollama_models = client.list_models()
-            st.session_state.ollama_conn = True
-        except Exception as exc:
-            st.session_state.ollama_models = []
-            st.session_state.ollama_conn = False
-            st.error(f"Ollama unavailable: {exc}")
+        health = client.health()
+        st.session_state.ollama_health = health
+        st.session_state.ollama_models = health['models']
+        st.session_state.ollama_conn = health['reachable']
+        if not health['reachable']:
+            st.error(f"Ollama unavailable: {health['error']}")
 with c2:
-    if st.session_state.get('ollama_conn'):
+    health = st.session_state.get('ollama_health')
+    if st.session_state.get('ollama_conn') and health:
+        st.success(f"Connected — {len(health['models'])} model(s), "
+                   f"{health['latency_ms']} ms, resolved model "
+                   f"`{health['resolved_model']}`")
+    elif st.session_state.get('ollama_conn'):
         st.success(f"Connected — {len(st.session_state.ollama_models)} "
                    "model(s) installed")
     elif st.session_state.get('ollama_conn') is False:
@@ -146,14 +151,16 @@ try:
     if mgr.store.load_error:
         st.warning(f"Store load warning: {mgr.store.load_error}")
 except Exception as exc:
-    st.warning(f"Incident store unavailable: {exc}")
+    st.warning(safe_error_message(exc, "Incident store unavailable"))
 
 # ---- Configuration ---------------------------------------------------------
 with st.expander("Configuration"):
     st.code(
         "OLLAMA_BASE_URL=%s\nOLLAMA_MODEL=%s\nOLLAMA_TIMEOUT=%s\n"
+        "OLLAMA_MAX_RETRIES=%s\nOLLAMA_RETRY_BACKOFF=%s\n"
         "MITRE cache: data/mitre_attack/\nIncident store: "
         "data/incidents/incidents.json" % (
-            base_url, st.session_state.ollama_model, timeout))
+            base_url, st.session_state.ollama_model, timeout,
+            client.max_retries, client.retry_backoff))
     st.caption("Secrets are never displayed. Set environment variables "
                "in a local .env file if needed.")
