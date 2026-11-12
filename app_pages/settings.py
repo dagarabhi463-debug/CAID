@@ -58,62 +58,105 @@ else:
     st.caption("Run an analysis to view calibration status.")
 
 # ---- Ollama ---------------------------------------------------------------
-st.markdown("### Ollama (local AI)")
-base_url = st.text_input("Ollama base URL",
-                         value=os.environ.get('OLLAMA_BASE_URL',
-                                              DEFAULT_BASE_URL),
-                         key='set_ollama_url')
-timeout = st.number_input("Timeout (s)", 5.0, 300.0,
-                          float(os.environ.get('OLLAMA_TIMEOUT',
-                                               DEFAULT_TIMEOUT)),
-                          key='set_ollama_timeout')
 
-client = OllamaClient(base_url=base_url, timeout=timeout)
+# ---- Ollama ---------------------------------------------------------------
+st.markdown("### Ollama (remote AI)")
 
-if 'ollama_models' not in st.session_state:
+def get_config(key, default=None):
+    """Read Streamlit secrets first, then environment variables."""
+    try:
+        value = st.secrets.get(key)
+        if value is not None:
+            return value
+    except Exception:
+        pass
+
+    return os.environ.get(key, default)
+
+
+base_url = st.text_input(
+    "Ollama base URL",
+    value=get_config("OLLAMA_BASE_URL", DEFAULT_BASE_URL),
+    key="set_ollama_url"
+)
+
+timeout = st.number_input(
+    "Timeout (s)",
+    min_value=5.0,
+    max_value=300.0,
+    value=float(get_config("OLLAMA_TIMEOUT", DEFAULT_TIMEOUT)),
+    key="set_ollama_timeout"
+)
+
+client = OllamaClient(
+    base_url=base_url.strip().rstrip("/"),
+    timeout=timeout
+)
+
+if "ollama_models" not in st.session_state:
     st.session_state.ollama_models = []
-if 'ollama_model' not in st.session_state:
-    st.session_state.ollama_model = os.environ.get('OLLAMA_MODEL',
-                                                 DEFAULT_MODEL)
+
+if "ollama_model" not in st.session_state:
+    st.session_state.ollama_model = get_config(
+        "OLLAMA_MODEL", DEFAULT_MODEL
+    )
 
 c1, c2 = st.columns(2)
+
 with c1:
-    if st.button("Test connection & refresh models", key='set_ollama_test'):
-        health = client.health()
+    if st.button(
+        "Test connection & refresh models",
+        key="set_ollama_test"
+    ):
+        with st.spinner("Connecting to Ollama..."):
+            health = client.health()
+
         st.session_state.ollama_health = health
-        st.session_state.ollama_models = health['models']
-        st.session_state.ollama_conn = health['reachable']
-        if not health['reachable']:
-            st.error(f"Ollama unavailable: {health['error']}")
+        st.session_state.ollama_models = health.get("models", [])
+        st.session_state.ollama_conn = health.get("reachable", False)
+
+        if health.get("reachable"):
+            st.success("Ollama connection successful.")
+        else:
+            st.error(
+                "Ollama unavailable: "
+                + str(health.get("error", "Connection failed"))
+            )
+
 with c2:
-    health = st.session_state.get('ollama_health')
-    if st.session_state.get('ollama_conn') and health:
-        st.success(f"Connected — {len(health['models'])} model(s), "
-                   f"{health['latency_ms']} ms, resolved model "
-                   f"`{health['resolved_model']}`")
-    elif st.session_state.get('ollama_conn'):
-        st.success(f"Connected — {len(st.session_state.ollama_models)} "
-                   "model(s) installed")
-    elif st.session_state.get('ollama_conn') is False:
-        st.warning("Connection failed")
+    health = st.session_state.get("ollama_health")
+
+    if st.session_state.get("ollama_conn") and health:
+        st.success(
+            f"Connected — {len(health['models'])} model(s), "
+            f"{health.get('latency_ms', 'N/A')} ms"
+        )
+    elif st.session_state.get("ollama_conn") is False:
+        st.warning("Ollama connection failed.")
 
 if st.session_state.ollama_models:
     current = st.session_state.ollama_model
+
     if current not in st.session_state.ollama_models:
         current = st.session_state.ollama_models[0]
-    st.session_state.ollama_model = st.selectbox(
-        "Active model", options=st.session_state.ollama_models,
-        index=st.session_state.ollama_models.index(current),
-        key='set_ollama_model_pick')
-else:
-    st.caption("No models listed — install one with "
-               "`ollama pull <model>` and refresh.")
-    st.session_state.ollama_model = st.text_input(
-        "Model name", value=st.session_state.ollama_model,
-        key='set_ollama_model_text')
 
-st.caption("AI features degrade gracefully when Ollama is offline; "
-           "detection is unaffected.")
+    selected_model = st.selectbox(
+        "Active model",
+        options=st.session_state.ollama_models,
+        index=st.session_state.ollama_models.index(current),
+        key="set_ollama_model_pick"
+    )
+
+    st.session_state.ollama_model = selected_model
+
+else:
+    st.caption("No models available. Check your Ollama connection.")
+
+st.caption(
+    "AI features degrade gracefully when Ollama is offline; "
+    "detection remains unaffected."
+)
+
 
 # ---- MITRE ----------------------------------------------------------------
 st.markdown("### MITRE ATT&CK")
