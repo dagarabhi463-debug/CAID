@@ -1,0 +1,299 @@
+{
+  "dataset": "..\\..\\..\\AppData\\Local\\Temp\\indep_v2",
+  "split": "holdout",
+  "rows": 1500,
+  "user_overlap_with_train_validation": [
+    "user_000",
+    "user_001",
+    "user_002",
+    "user_003",
+    "user_004",
+    "user_005",
+    "user_006",
+    "user_007",
+    "user_008",
+    "user_009",
+    "user_010",
+    "user_011",
+    "user_012",
+    "user_013",
+    "user_014",
+    "user_015",
+    "user_016",
+    "user_017",
+    "user_018",
+    "user_019",
+    "user_020",
+    "user_021",
+    "user_022",
+    "user_023",
+    "user_024",
+    "user_025",
+    "user_026",
+    "user_027",
+    "user_028",
+    "user_029",
+    "user_030",
+    "user_031",
+    "user_032",
+    "user_033",
+    "user_034",
+    "user_035",
+    "user_036",
+    "user_037",
+    "user_038",
+    "user_039",
+    "user_040",
+    "user_041",
+    "user_042",
+    "user_043",
+    "user_044",
+    "user_045",
+    "user_046",
+    "user_047"
+  ],
+  "entity_disjoint_users": false,
+  "label_counts": {
+    "normal": 1065,
+    "suspicious": 274,
+    "high_risk": 161
+  },
+  "calibration_statuses": {
+    "risk": "calibrated",
+    "detection": "calibrated",
+    "threshold_version": "cal-20261112T055222Z-2962264f"
+  },
+  "operating_modes": {
+    "full_v2_0": 1500
+  },
+  "channels": {
+    "ml": {
+      "roc_auc": 0.8756,
+      "pr_auc": 0.7908,
+      "tp": 366,
+      "fp": 290,
+      "tn": 775,
+      "fn": 69,
+      "precision": 0.5579,
+      "recall": 0.8414,
+      "f1": 0.6709,
+      "fpr": 0.2723
+    },
+    "rules": {
+      "roc_auc": 0.8287,
+      "pr_auc": 0.7176,
+      "tp": 8,
+      "fp": 1,
+      "tn": 1064,
+      "fn": 427,
+      "precision": 0.8889,
+      "recall": 0.0184,
+      "f1": 0.036,
+      "fpr": 0.0009
+    },
+    "behavioral": {
+      "roc_auc": 0.9011,
+      "pr_auc": 0.839,
+      "tp": 307,
+      "fp": 40,
+      "tn": 1025,
+      "fn": 128,
+      "precision": 0.8847,
+      "recall": 0.7057,
+      "f1": 0.7852,
+      "fpr": 0.0376
+    },
+    "session": {
+      "roc_auc": 0.8744,
+      "pr_auc": 0.7183,
+      "tp": 93,
+      "fp": 18,
+      "tn": 1047,
+      "fn": 342,
+      "precision": 0.8378,
+      "recall": 0.2138,
+      "f1": 0.3407,
+      "fpr": 0.0169
+    },
+    "sequence": {
+      "roc_auc": 0.8309,
+      "pr_auc": 0.7584,
+      "tp": 323,
+      "fp": 132,
+      "tn": 933,
+      "fn": 112,
+      "precision": 0.7099,
+      "recall": 0.7425,
+      "f1": 0.7258,
+      "fpr": 0.1239
+    },
+    "combined_v2_0": {
+      "tp": 351,
+      "fp": 46,
+      "tn": 1019,
+      "fn": 84,
+      "precision": 0.8841,
+      "recall": 0.8069,
+      "f1": 0.8438,
+      "fpr": 0.0432,
+      "score_auc": {
+        "roc_auc": 0.9289,
+        "pr_auc": 0.8364
+      }
+    },
+    "slice_holdout_only_users": {
+      "n": 350,
+      "ml": {
+        "roc_auc": 0.8857,
+        "pr_auc": 0.8217,
+        "tp": 102,
+        "fp": 66,
+        "tn": 166,
+        "fn": 16,
+        "precision": 0.6071,
+        "recall": 0.8644,
+        "f1": 0.7133,
+        "fpr": 0.2845
+      },
+      "rules": {
+        "roc_auc": 0.8547,
+        "pr_auc": 0.7688,
+        "tp": 2,
+        "fp": 0,
+        "tn": 232,
+        "fn": 116,
+        "precision": 1.0,
+        "recall": 0.0169,
+        "f1": 0.0333,
+        "fpr": 0.0
+      },
+      "behavioral": {
+        "roc_auc": 0.9181,
+        "pr_auc": 0.8878,
+        "tp": 90,
+        "fp": 7,
+        "tn": 225,
+        "fn": 28,
+        "precision": 0.9278,
+        "recall": 0.7627,
+        "f1": 0.8372,
+        "fpr": 0.0302
+      },
+      "session": {
+        "roc_auc": 0.9021,
+        "pr_auc": 0.7906,
+        "tp": 26,
+        "fp": 2,
+        "tn": 230,
+        "fn": 92,
+        "precision": 0.9286,
+        "recall": 0.2203,
+        "f1": 0.3562,
+        "fpr": 0.0086
+      },
+      "sequence": {
+        "roc_auc": 0.8677,
+        "pr_auc": 0.8279,
+        "tp": 96,
+        "fp": 23,
+        "tn": 209,
+        "fn": 22,
+        "precision": 0.8067,
+        "recall": 0.8136,
+        "f1": 0.8101,
+        "fpr": 0.0991
+      },
+      "combined_v2_0": {
+        "tp": 98,
+        "fp": 9,
+        "tn": 223,
+        "fn": 20,
+        "precision": 0.9159,
+        "recall": 0.8305,
+        "f1": 0.8711,
+        "fpr": 0.0388
+      },
+      "score_auc": {
+        "roc_auc": 0.9381,
+        "pr_auc": 0.8821
+      }
+    },
+    "slice_shared_users": {
+      "n": 1150,
+      "ml": {
+        "roc_auc": 0.8716,
+        "pr_auc": 0.7759,
+        "tp": 264,
+        "fp": 224,
+        "tn": 609,
+        "fn": 53,
+        "precision": 0.541,
+        "recall": 0.8328,
+        "f1": 0.6559,
+        "fpr": 0.2689
+      },
+      "rules": {
+        "roc_auc": 0.8189,
+        "pr_auc": 0.6951,
+        "tp": 6,
+        "fp": 1,
+        "tn": 832,
+        "fn": 311,
+        "precision": 0.8571,
+        "recall": 0.0189,
+        "f1": 0.037,
+        "fpr": 0.0012
+      },
+      "behavioral": {
+        "roc_auc": 0.895,
+        "pr_auc": 0.8196,
+        "tp": 217,
+        "fp": 33,
+        "tn": 800,
+        "fn": 100,
+        "precision": 0.868,
+        "recall": 0.6845,
+        "f1": 0.7654,
+        "fpr": 0.0396
+      },
+      "session": {
+        "roc_auc": 0.8661,
+        "pr_auc": 0.6938,
+        "tp": 67,
+        "fp": 16,
+        "tn": 817,
+        "fn": 250,
+        "precision": 0.8072,
+        "recall": 0.2114,
+        "f1": 0.335,
+        "fpr": 0.0192
+      },
+      "sequence": {
+        "roc_auc": 0.8178,
+        "pr_auc": 0.73,
+        "tp": 227,
+        "fp": 109,
+        "tn": 724,
+        "fn": 90,
+        "precision": 0.6756,
+        "recall": 0.7161,
+        "f1": 0.6953,
+        "fpr": 0.1309
+      },
+      "combined_v2_0": {
+        "tp": 253,
+        "fp": 37,
+        "tn": 796,
+        "fn": 64,
+        "precision": 0.8724,
+        "recall": 0.7981,
+        "f1": 0.8336,
+        "fpr": 0.0444
+      },
+      "score_auc": {
+        "roc_auc": 0.9253,
+        "pr_auc": 0.8183
+      }
+    }
+  }
+}

@@ -89,10 +89,11 @@
     99.9
   ],
   "detection_thresholds": {
-    "medium": 0.13318132745652034,
-    "high": 0.2006722315725792,
-    "critical": 0.23205835392125862
+    "medium": 0.2,
+    "high": 0.3,
+    "critical": 0.45
   },
+  "detection_thresholds_source": "explicit_operating_point",
   "risk_thresholds": {
     "medium": 0.09405127269077865,
     "high": 0.12879669848943523,

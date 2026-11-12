@@ -31,7 +31,14 @@ THRESHOLDS:
       (30, 65, 85) of calibration-normal risk_score
     - detection (v2):   higher-tail percentiles (90, 99, 99.9) of
       calibration-normal combined_score under channel_profile='v2_0'
-      to reduce false-positive High/Critical classifications
+      to reduce false-positive High/Critical classifications.
+      Alternatively, --detection-thresholds medium,high,critical sets
+      absolute cutoffs explicitly. This is REQUIRED after the v2_0
+      channel-weight recalibration (2026-11): under the new weights
+      calibration-normal combined scores sit near zero, so percentile
+      cutoffs cannot express the validation-derived operating point
+      (medium=0.20 recall-band, high=0.30 F1-max, critical=0.45
+      precision-band; see docs/research/phase_4_6_fusion_recalibration.md).
 
 GUARANTEES:
     - dataset_role='calibration' enforced by save_calibration
@@ -164,6 +171,9 @@ def main() -> Dict:
     ap = argparse.ArgumentParser()
     ap.add_argument('--check', action='store_true',
                     help='verify fingerprints/artifacts without writing')
+    ap.add_argument('--detection-thresholds', metavar='MEDIUM,HIGH,CRITICAL',
+                    help='explicit detection cutoffs overriding the '
+                         'percentile-derived values (e.g. 0.20,0.30,0.45)')
     args = ap.parse_args()
 
     # --- deterministic entity-disjoint splits -------------------------
@@ -232,6 +242,16 @@ def main() -> Dict:
     p = np.percentile(scores, list(DETECTION_PERCENTILES))
     detection_thresholds = {
         'medium': float(p[0]), 'high': float(p[1]), 'critical': float(p[2])}
+    detection_thresholds_source = 'calibration_normal_percentiles'
+    if args.detection_thresholds:
+        parts = [float(x) for x in args.detection_thresholds.split(',')]
+        if len(parts) != 3 or not parts[0] <= parts[1] <= parts[2]:
+            raise ValueError(
+                '--detection-thresholds must be MEDIUM,HIGH,CRITICAL '
+                'with medium <= high <= critical')
+        detection_thresholds = {
+            'medium': parts[0], 'high': parts[1], 'critical': parts[2]}
+        detection_thresholds_source = 'explicit_operating_point'
     engine.thresholds.update(detection_thresholds)
 
     # --- provenance manifest -------------------------------------------
@@ -252,6 +272,7 @@ def main() -> Dict:
         'risk_percentiles': list(PERCENTILES),
         'detection_percentiles': list(DETECTION_PERCENTILES),
         'detection_thresholds': detection_thresholds,
+        'detection_thresholds_source': detection_thresholds_source,
         'risk_thresholds': dict(risk.fixed_thresholds),
         'fingerprints': fingerprints,
         'notes': [

@@ -9,8 +9,8 @@
   "validation_scope": "internal_reproducibility",
   "independent_validation": "not_performed_current_data_only",
   "timing": {
-    "validation_pipeline_s": 3.48,
-    "holdout_pipeline_s": 3.64
+    "validation_pipeline_s": 6.94,
+    "holdout_pipeline_s": 4.82
   },
   "channels": {
     "ml": {
@@ -148,13 +148,13 @@
     "validation": {
       "roc_auc": 1.0,
       "pr_auc": 0.9677,
-      "tp": 14,
+      "tp": 27,
       "fp": 0,
       "tn": 92,
-      "fn": 17,
+      "fn": 4,
       "precision": 1.0,
-      "recall": 0.4516,
-      "f1": 0.6222,
+      "recall": 0.871,
+      "f1": 0.931,
       "fpr": 0.0,
       "operating_modes": {
         "full_v2_0": 123
@@ -164,13 +164,13 @@
     "holdout": {
       "roc_auc": 1.0,
       "pr_auc": 0.9714,
-      "tp": 12,
+      "tp": 31,
       "fp": 0,
       "tn": 98,
-      "fn": 23,
+      "fn": 4,
       "precision": 1.0,
-      "recall": 0.3429,
-      "f1": 0.5106,
+      "recall": 0.8857,
+      "f1": 0.9394,
       "fpr": 0.0,
       "operating_modes": {
         "full_v2_0": 133
@@ -183,56 +183,56 @@
       "validation": {
         "roc_auc": 1.0,
         "pr_auc": 0.9677,
-        "tp": 14,
+        "tp": 26,
         "fp": 0,
         "tn": 92,
-        "fn": 17,
+        "fn": 5,
         "precision": 1.0,
-        "recall": 0.4516,
-        "f1": 0.6222,
+        "recall": 0.8387,
+        "f1": 0.9123,
         "fpr": 0.0,
-        "pipeline_s": 4.28
+        "pipeline_s": 5.26
       },
       "holdout": {
         "roc_auc": 1.0,
         "pr_auc": 0.9714,
-        "tp": 12,
+        "tp": 30,
         "fp": 0,
         "tn": 98,
-        "fn": 23,
+        "fn": 5,
         "precision": 1.0,
-        "recall": 0.3429,
-        "f1": 0.5106,
+        "recall": 0.8571,
+        "f1": 0.9231,
         "fpr": 0.0,
-        "pipeline_s": 3.58
+        "pipeline_s": 4.66
       }
     },
     "rules": {
       "validation": {
         "roc_auc": 1.0,
         "pr_auc": 0.9677,
-        "tp": 14,
+        "tp": 28,
         "fp": 0,
         "tn": 92,
-        "fn": 17,
+        "fn": 3,
         "precision": 1.0,
-        "recall": 0.4516,
-        "f1": 0.6222,
+        "recall": 0.9032,
+        "f1": 0.9492,
         "fpr": 0.0,
-        "pipeline_s": 3.6
+        "pipeline_s": 4.52
       },
       "holdout": {
         "roc_auc": 1.0,
         "pr_auc": 0.9714,
-        "tp": 12,
+        "tp": 32,
         "fp": 0,
         "tn": 98,
-        "fn": 23,
+        "fn": 3,
         "precision": 1.0,
-        "recall": 0.3429,
-        "f1": 0.5106,
+        "recall": 0.9143,
+        "f1": 0.9552,
         "fpr": 0.0,
-        "pipeline_s": 3.39
+        "pipeline_s": 3.94
       }
     },
     "behavioral": {
@@ -247,7 +247,7 @@
         "recall": 0.4516,
         "f1": 0.6222,
         "fpr": 0.0,
-        "pipeline_s": 3.16
+        "pipeline_s": 5.47
       },
       "holdout": {
         "roc_auc": 1.0,
@@ -260,63 +260,63 @@
         "recall": 0.3429,
         "f1": 0.5106,
         "fpr": 0.0,
-        "pipeline_s": 3.45
+        "pipeline_s": 4.26
       }
     },
     "session": {
       "validation": {
         "roc_auc": 1.0,
         "pr_auc": 0.9677,
-        "tp": 14,
+        "tp": 30,
         "fp": 0,
         "tn": 92,
-        "fn": 17,
+        "fn": 1,
         "precision": 1.0,
-        "recall": 0.4516,
-        "f1": 0.6222,
+        "recall": 0.9677,
+        "f1": 0.9836,
         "fpr": 0.0,
-        "pipeline_s": 3.84
+        "pipeline_s": 4.39
       },
       "holdout": {
         "roc_auc": 1.0,
         "pr_auc": 0.9714,
-        "tp": 13,
+        "tp": 35,
         "fp": 0,
         "tn": 98,
-        "fn": 22,
+        "fn": 0,
         "precision": 1.0,
-        "recall": 0.3714,
-        "f1": 0.5417,
+        "recall": 1.0,
+        "f1": 1.0,
         "fpr": 0.0,
-        "pipeline_s": 3.98
+        "pipeline_s": 4.65
       }
     },
     "sequence": {
       "validation": {
         "roc_auc": 1.0,
         "pr_auc": 0.9677,
-        "tp": 16,
+        "tp": 29,
         "fp": 0,
         "tn": 92,
-        "fn": 15,
+        "fn": 2,
         "precision": 1.0,
-        "recall": 0.5161,
-        "f1": 0.6809,
+        "recall": 0.9355,
+        "f1": 0.9667,
         "fpr": 0.0,
-        "pipeline_s": 4.13
+        "pipeline_s": 3.88
       },
       "holdout": {
         "roc_auc": 1.0,
         "pr_auc": 0.9714,
-        "tp": 14,
+        "tp": 35,
         "fp": 0,
         "tn": 98,
-        "fn": 21,
+        "fn": 0,
         "precision": 1.0,
-        "recall": 0.4,
-        "f1": 0.5714,
+        "recall": 1.0,
+        "f1": 1.0,
         "fpr": 0.0,
-        "pipeline_s": 3.58
+        "pipeline_s": 4.03
       }
     }
   },
@@ -355,13 +355,13 @@
   "threshold_sensitivity_validation_only": [
     {
       "threshold": 0.3,
-      "tp": 29,
+      "tp": 27,
       "fp": 0,
       "tn": 92,
-      "fn": 2,
+      "fn": 4,
       "precision": 1.0,
-      "recall": 0.9355,
-      "f1": 0.9667,
+      "recall": 0.871,
+      "f1": 0.931,
       "fpr": 0.0
     },
     {
@@ -388,6 +388,17 @@
     },
     {
       "threshold": 0.45,
+      "tp": 18,
+      "fp": 0,
+      "tn": 92,
+      "fn": 13,
+      "precision": 1.0,
+      "recall": 0.5806,
+      "f1": 0.7347,
+      "fpr": 0.0
+    },
+    {
+      "threshold": 0.5,
       "tp": 17,
       "fp": 0,
       "tn": 92,
@@ -395,17 +406,6 @@
       "precision": 1.0,
       "recall": 0.5484,
       "f1": 0.7083,
-      "fpr": 0.0
-    },
-    {
-      "threshold": 0.5,
-      "tp": 14,
-      "fp": 0,
-      "tn": 92,
-      "fn": 17,
-      "precision": 1.0,
-      "recall": 0.4516,
-      "f1": 0.6222,
       "fpr": 0.0
     },
     {
@@ -432,35 +432,35 @@
     },
     {
       "threshold": 0.65,
-      "tp": 10,
+      "tp": 14,
       "fp": 0,
       "tn": 92,
-      "fn": 21,
+      "fn": 17,
       "precision": 1.0,
-      "recall": 0.3226,
-      "f1": 0.4878,
+      "recall": 0.4516,
+      "f1": 0.6222,
       "fpr": 0.0
     },
     {
       "threshold": 0.7,
-      "tp": 5,
+      "tp": 14,
       "fp": 0,
       "tn": 92,
-      "fn": 26,
+      "fn": 17,
       "precision": 1.0,
-      "recall": 0.1613,
-      "f1": 0.2778,
+      "recall": 0.4516,
+      "f1": 0.6222,
       "fpr": 0.0
     },
     {
       "threshold": 0.75,
-      "tp": 0,
+      "tp": 2,
       "fp": 0,
       "tn": 92,
-      "fn": 31,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "fn": 29,
+      "precision": 1.0,
+      "recall": 0.0645,
+      "f1": 0.1212,
       "fpr": 0.0
     },
     {

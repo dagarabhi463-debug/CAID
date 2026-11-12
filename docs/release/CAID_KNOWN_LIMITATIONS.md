@@ -4,10 +4,10 @@ Honest bounds. Nothing here is a defect; all are documented design or evidence l
 
 ## Detection performance
 
-1. **Independent holdout (synthetic OOD):** combined v2_0 recall 0.94 but **precision 0.50 / FPR 0.39** (`docs/research/phase_4_3_independent_validation.md`). Internal splits look near-perfect — do not extrapolate them.
+1. **Independent holdout (synthetic OOD):** after the Phase 4.6 fusion recalibration, combined v2_0 is **precision 0.88 / recall 0.81 / FPR 0.04** (`docs/research/phase_4_6_fusion_recalibration.md`, `reports/independent_detection_evaluation_v2.json`). The v1.0 operating point (P 0.50 / R 0.94 / FPR 0.39) is preserved in `phase_4_3_independent_validation.md`. Internal splits look near-perfect — do not extrapolate them. Recall was traded for precision; the holdout has now been evaluated twice (post-hoc caveat in Phase 4.6 §5).
 2. **Synthetic data only.** No real Canvas/enterprise logs were evaluated; an authorized real-world validation set does not exist for this project.
 3. **Partial entity overlap:** the independent_v2 holdout shares 48/64 user IDs with train/validation by cohort design; only `user_h*` users are fully disjoint (same FP pattern observed there).
-4. **Rules channel is near-silent** on independent data (recall 0.018); session/sequence channels carry recall unevenly. Fusion favors sensitivity.
+4. **Rules channel is near-silent** on independent data (recall 0.018); session/behavioral channels carry most of the precision since the Phase 4.6 reweight. Fusion still favors the weighted-mean operating point, not corroboration gating.
 5. **Scores are calibrated anomaly scores, not probabilities.** Thresholds are fixed post-calibration; no per-deployment tuning is supported.
 
 ## Streaming

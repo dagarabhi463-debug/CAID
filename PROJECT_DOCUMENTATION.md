@@ -563,8 +563,10 @@ recoverable via `git show bfdca25:docs/`).
 > pipeline. Authoritative limitation list: `docs/release/CAID_KNOWN_LIMITATIONS.md`.
 
 - **Synthetic data only** — no real Canvas connectivity; metrics are not
-  real-world accuracy figures. Independent synthetic holdout: recall 0.94,
-  precision 0.50 (`docs/research/phase_4_3_independent_validation.md`).
+  real-world accuracy figures. Independent synthetic holdout (post Phase
+  4.6 recalibration): precision 0.88, recall 0.81, FPR 0.04
+  (`docs/research/phase_4_6_fusion_recalibration.md`); the v1.0 operating
+  point was precision 0.50 (`docs/research/phase_4_3_independent_validation.md`).
 - **Retrospective, batch-oriented dashboard** — streaming detection
   exists (`core/streaming/`) but correlation/incidents remain
   window-scoped.

@@ -30,9 +30,14 @@ CHANNEL_PROFILES = {
   'legacy':   ml .35 rules .35 behavioral .30
   'session':  ml .30 rules .30 behavioral .20 session .20
   'sequence': ml .30 rules .30 behavioral .20 sequence .20
-  'v2_0':     ml .25 rules .25 behavioral .15 session .20 sequence .15
+  'v2_0':     ml .05 rules .15 behavioral .35 session .30 sequence .15
 }
 ```
+
+v2_0 weights were rebalanced in Phase 4.6 on pooled **validation**
+splits only (internal + independent_v2; holdout never used for
+selection) to suppress single-channel false positives — see
+`docs/research/phase_4_6_fusion_recalibration.md`.
 
 Custom `weights=` may be supplied; configured channels = weight keys.
 

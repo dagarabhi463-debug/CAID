@@ -80,13 +80,17 @@ _FULL_OPERATING_MODES = {
     OperatingMode.FULL_V2_0,
 }
 
-# Fixed, documented channel profiles. Weights are NOT tuned on holdout data.
+# Fixed, documented channel profiles. v2_0 weights were selected on the
+# pooled VALIDATION splits of the internal and independent_v2 corpora
+# (never on holdout data) to suppress single-channel false positives:
+# behavioral/session baselines are the most precise channels on OOD
+# synthetic traffic, while ml/sequence are the noisiest.
 CHANNEL_PROFILES: Dict[str, Dict[str, float]] = {
     'legacy': {'ml': 0.35, 'rules': 0.35, 'behavioral': 0.30},
     'session': {'ml': 0.30, 'rules': 0.30, 'behavioral': 0.20, 'session': 0.20},
     'sequence': {'ml': 0.30, 'rules': 0.30, 'behavioral': 0.20, 'sequence': 0.20},
-    'v2_0': {'ml': 0.25, 'rules': 0.25, 'behavioral': 0.15,
-            'session': 0.20, 'sequence': 0.15},
+    'v2_0': {'ml': 0.05, 'rules': 0.15, 'behavioral': 0.35,
+            'session': 0.30, 'sequence': 0.15},
 }
 
 _PROFILE_MODES = {

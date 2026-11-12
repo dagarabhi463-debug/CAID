@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — post-v1.0
+
+### Detection precision fix (Phase 4.6)
+- v2_0 channel weights rebalanced toward precise channels (behavioral 0.35, session 0.30; ml reduced to 0.05) and detection operating point recalibrated to medium/high/critical = 0.20/0.30/0.45 from pooled-validation analysis.
+- Independent_v2 holdout: precision 0.50 → 0.88, FPR 0.39 → 0.04, F1 0.65 → 0.84 (recall 0.94 → 0.81, intentional trade-off).
+- New repeatable eval script `scripts/evaluate_independent_detection.py`; artifact `cal-20261112T055222Z-2962264f`.
+- Details: `docs/research/phase_4_6_fusion_recalibration.md`.
+
 ## v1.0 — 2026-11-12
 
 First stable release of CAID (Cybersecurity AI Detection & Investigation Platform).

@@ -13,6 +13,14 @@ data to the ML benchmark, so results are comparable.
 
 Outputs reports/fusion_evaluation.json and prints a summary.
 Scores are anomaly/deviation scores — NOT probabilities.
+
+The combined engine is given the PRODUCTION calibrated detection
+operating point (artifact cal-20261112T055222Z-2962264f,
+medium/high/critical = 0.20/0.30/0.45; see
+docs/research/phase_4_6_fusion_recalibration.md) so reported
+risk_level predictions match the deployed threshold semantics. The
+baselines here are refit on unsup_train, so this is an internal
+reproducibility check, not the calibrated-artifact path.
 """
 
 from __future__ import annotations
@@ -46,6 +54,11 @@ SCORE_COLS = {
     'behavioral': 'behavioral_deviation_score',
     'session': 'session_deviation_score',
     'sequence': 'sequence_deviation_score',
+}
+
+# Production calibrated detection operating point (Phase 4.6).
+PRODUCTION_DETECTION_THRESHOLDS = {
+    'medium': 0.20, 'high': 0.30, 'critical': 0.45,
 }
 
 
@@ -99,7 +112,10 @@ def run_pipeline(raw_df: pd.DataFrame, train_normal: pd.DataFrame,
     # session/sequence channels remain configured.
     eff_profile = ('v2_0' if ('session' in weights or 'sequence' in weights)
                    else 'legacy')
-    engine = DetectionEngine(channel_profile=eff_profile, weights=weights)
+    engine = DetectionEngine(
+        channel_profile=eff_profile, weights=weights,
+        thresholds=(PRODUCTION_DETECTION_THRESHOLDS
+                    if eff_profile == 'v2_0' else None))
     return engine.process_dataframe(out)
 
 

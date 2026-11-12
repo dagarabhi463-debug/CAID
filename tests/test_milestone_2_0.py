@@ -171,7 +171,7 @@ class TestDetectionEngineV2:
     def test_v2_weights_combined(self):
         engine = DetectionEngine(channel_profile='v2_0')
         det = engine.process_event(self._row())
-        expected = (0.25*0.4 + 0.25*0.1 + 0.15*0.2 + 0.20*0.3 + 0.15*0.2)
+        expected = (0.05*0.4 + 0.15*0.1 + 0.35*0.2 + 0.30*0.3 + 0.15*0.2)
         assert det.combined_score == pytest.approx(expected)
         assert det.operating_mode == OperatingMode.FULL_V2_0.value
 
@@ -181,7 +181,7 @@ class TestDetectionEngineV2:
                                               session_score_missing=True))
         assert 'session' in det.missing_channels
         assert det.combined_score == pytest.approx(
-            (0.25*0.4 + 0.25*0.1 + 0.15*0.2 + 0.15*0.2) / 0.80)
+            (0.05*0.4 + 0.15*0.1 + 0.35*0.2 + 0.15*0.2) / 0.70)
         assert det.operating_mode == OperatingMode.DEGRADED_V2_0.value
 
     def test_legacy_profile_ignores_session_columns(self):
